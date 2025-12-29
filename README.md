@@ -36,7 +36,7 @@
 
 ### 1）导入 Dify 工作流
 
-请先阅读：[`workflows/dify/README.md`](./dify/README.md)
+在 dify 工作室页面导入 dsl
 
 ### 2）跑通示例
 1. 在PromptSemIR编译的Dify工作流中，输入任意一个Prompt，运行得到PromptSemIR文件内容
