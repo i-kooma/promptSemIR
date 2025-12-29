@@ -1,0 +1,320 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: PromptSemIR 转译
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.1@48bf314aad49c68acee6545f34b6ddb652c33e7da457dfb197ac514065e776e4
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1766934024082-source-1766934027460-target
+      source: '1766934024082'
+      sourceHandle: source
+      target: '1766934027460'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1766934027460-source-1766934029593-target
+      source: '1766934027460'
+      sourceHandle: source
+      target: '1766934029593'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: end
+      id: 1766934029593-source-1766934704811-target
+      source: '1766934029593'
+      sourceHandle: source
+      target: '1766934704811'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          default: ''
+          hint: ''
+          label: promptsemir_json
+          max_length: 102400
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: promptsemir_json
+        - hint: ''
+          label: target_llm_preference
+          max_length: 102400
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: target_llm_preference
+        - default: ''
+          hint: ''
+          label: strict_mode
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: checkbox
+          variable: strict_mode
+      height: 161
+      id: '1766934024082'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(promptsemir_json: str, strict_mode: bool) ->\
+          \ dict:\n    \"\"\"\n    功能：从 PromptSemIR 完整文件中提取用于转译的“净荷”语义视图。\n    逻辑：\n\
+          \    1. 解析输入 JSON。\n    2. 确定数据源：优先使用 final_view (已应用 Patch)，降级使用 promptSem\
+          \ (草稿)。\n    3. 过滤：根据 strict_mode 决定是否丢弃 inferred/projected 层。\n    4. 提取原文片段：用于\
+          \ Tone Reference。\n    5. 序列化输出。\n    \"\"\"\n    \n    # =================\
+          \ 1. 安全解析 JSON =================\n    data = {}\n    # Dify 有时会根据上游节点类型自动转\
+          \ dict，有时传 str，需兼容\n    if isinstance(promptsemir_json, dict):\n       \
+          \ data = promptsemir_json\n    else:\n        try:\n            # 兼容空字符串情况\n\
+          \            if not promptsemir_json or not str(promptsemir_json).strip():\n\
+          \                return {\"semantic_view_str\": \"{}\", \"raw_snippet_hint\"\
+          : \"\"}\n            data = json.loads(promptsemir_json)\n        except\
+          \ Exception as e:\n            # 解析失败时不报错中断，而是返回错误提示给 LLM，让 LLM 决定如何处理\n\
+          \            return {\n                \"semantic_view_str\": json.dumps({\"\
+          error\": f\"JSON parse failed: {str(e)}\"}, ensure_ascii=False),\n     \
+          \           \"raw_snippet_hint\": \"\"\n            }\n\n    # =================\
+          \ 2. 确定语义源 (Source of Truth) =================\n    # final_view 是“物化视图”，包含了\
+          \ Patch 后的结果，是第一优先级\n    semantic_source = data.get(\"final_view\")\n  \
+          \  \n    # 如果 final_view 不存在（例如是刚编译完的中间态），则回退到 promptSem\n    if not semantic_source:\n\
+          \        semantic_source = data.get(\"promptSem\", {})\n\n    # =================\
+          \ 3. 严格模式过滤 (Strict Mode) =================\n    # 处理 Dify Checkbox 可能传入的类型差异\n\
+          \    is_strict = False\n    if isinstance(strict_mode, bool):\n        is_strict\
+          \ = strict_mode\n    elif isinstance(strict_mode, str):\n        is_strict\
+          \ = strict_mode.lower() == 'true'\n\n    filtered_data = {}\n    \n    #\
+          \ [Core] 永远保留\n    # 使用 .get() 防止键不存在报错\n    filtered_data[\"core_semantics\"\
+          ] = semantic_source.get(\"core_semantics\", {})\n    \n    # [Derived &\
+          \ Augmentation] 仅在非严格模式下保留\n    if not is_strict:\n        filtered_data[\"\
+          derived_semantics\"] = semantic_source.get(\"derived_semantics\", {})\n\
+          \        filtered_data[\"augmentation_plan\"] = semantic_source.get(\"augmentation_plan\"\
+          , {})\n\n    # ================= 4. 提取原文片段 (Tone Hint) =================\n\
+          \    # 路径：source_prompt -> raw\n    # 目的：给 LLM 提供“语气参考”，但不作为语义依据\n    source_obj\
+          \ = data.get(\"source_prompt\", {})\n    raw_text = source_obj.get(\"raw\"\
+          , \"\")\n    if not isinstance(raw_text, str):\n        raw_text = \"\"\n\
+          \        \n    # 截取前 300 字符，去除首尾空白\n    raw_snippet_hint = raw_text.strip()[:300]\n\
+          \    if len(raw_text) > 300:\n        raw_snippet_hint += \"...\"\n\n  \
+          \  # ================= 5. 输出序列化 =================\n    return {\n      \
+          \  # 重点：ensure_ascii=False 保证中文不乱码，indent=2 保证 LLM 易读\n        \"semantic_view_str\"\
+          : json.dumps(filtered_data, ensure_ascii=False, indent=2),\n        \"raw_snippet_hint\"\
+          : raw_snippet_hint\n    }"
+        code_language: python3
+        desc: ''
+        outputs:
+          raw_snippet_hint:
+            children: null
+            type: string
+          semantic_view_str:
+            children: null
+            type: string
+        selected: true
+        title: Semantic Filter & Flattener
+        type: code
+        variables:
+        - value_selector:
+          - '1766934024082'
+          - promptsemir_json
+          value_type: string
+          variable: promptsemir_json
+        - value_selector:
+          - '1766934024082'
+          - strict_mode
+          value_type: boolean
+          variable: strict_mode
+      height: 52
+      id: '1766934027460'
+      position:
+        x: 386.54120281732264
+        y: 287.9679743657389
+      positionAbsolute:
+        x: 386.54120281732264
+        y: 287.9679743657389
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-3-pro-preview
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 60ba5c38-5d1b-4e34-bed4-fbe982097eaa
+          role: system
+          text: "### Role\n你是一名资深的 Prompt Engineer。你的任务是将结构化的【PromptSemIR 语义视图】（JSON）还原为一份高质量的【自然语言\
+            \ Prompt】。\n\n### 核心原则 (Critical Principles)\n1.  **语言一致性 (Language Consistency)**：\n\
+            \    * **检测输入语言**：分析 `core_semantics` 中使用的语言（这里是中文）。\n    * **强制输出同语言**：你生成的\
+            \ Prompt 中的所有指令、标题、描述、角色定义**必须使用中文**。绝对禁止将中文意图翻译成英文指令（例如：不要把“角色”写成“# Role”）。\n\
+            \n2.  **接口刚性 (Schema Rigidity)**：\n    * **复制粘贴原则**：对于 `output_spec` 中定义的\
+            \ JSON 结构，你必须**逐字复制**，禁止做任何“优化”或“简化”。\n    * **禁止类型转换**：如果原定义是 Object（如\
+            \ `data_quality`），绝对不能把它改成 String。\n    * **禁止键名修改**：如果原定义是 `timeline`，绝对不能改成\
+            \ `cycle`。\n\n### 转译步骤\n\n#### Step 1: 角色与背景 (Role & Context)\n* 用**中文**定义角色（如\
+            \ `# 角色`）。\n* 根据 `intent` 和 `raw_hint` 还原背景。\n\n#### Step 2: 变量注入\n* 保持变量名不变（如\
+            \ `{{kpi_table}}`）。\n* 用**中文**描述变量用途。\n\n#### Step 3: 逻辑与约束\n* 将 `constraints`\
+            \ 转化为**中文**指令（如 `## 约束条件`）。\n* 负面约束使用加粗强调。\n\n#### Step 4: 输出规范还原 (Output\
+            \ Spec)\n* **警告**：这是最容易出错的地方。\n* 请直接从 Semantic View 中提取 JSON 结构，**原样**放入\
+            \ Prompt 的输出要求中。\n* 添加指令：“输出必须严格遵循以下 JSON 结构，不要修改字段名，不要使用 Markdown 代码块”。\n\
+            \n### 输出格式\n直接输出生成的中文 Prompt 内容。"
+        - id: f5fca28f-13e7-42a3-bd4f-b3792ab5b571
+          role: user
+          text: '【语义视图 (Semantic View)】
+
+            {{#1766934027460.semantic_view_str#}}
+
+
+            【参考语气 (Raw Hint)】
+
+            (原 Prompt 开头片段，仅供参考语气，不要照抄内容)
+
+            {{#1766934027460.raw_snippet_hint#}}
+
+
+            【目标模型偏好 (Target Preference)】
+
+            {{#1766934024082.target_llm_preference#}}
+
+
+            请生成最终的 Prompt：'
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1766934029593'
+      position:
+        x: 684
+        y: 287.9679743657389
+      positionAbsolute:
+        x: 684
+        y: 287.9679743657389
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1766934029593'
+          - text
+          value_type: string
+          variable: text
+        selected: false
+        title: 输出
+        type: end
+      height: 88
+      id: '1766934704811'
+      position:
+        x: 986
+        y: 282
+      positionAbsolute:
+        x: 986
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 120.56357508825027
+      y: 296.2315662361055
+      zoom: 0.3917485934746727
+  rag_pipeline_variables: []

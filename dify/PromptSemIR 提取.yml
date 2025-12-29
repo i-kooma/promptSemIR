@@ -1,0 +1,1277 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: PromptSemIR 提取 v2
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.1@48bf314aad49c68acee6545f34b6ddb652c33e7da457dfb197ac514065e776e4
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1766820407515-source-1766820610973-target
+      source: '1766820407515'
+      sourceHandle: source
+      target: '1766820610973'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1766820610973-source-1766820621872-target
+      source: '1766820610973'
+      sourceHandle: source
+      target: '1766820621872'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1766820621872-source-1766820634418-target
+      source: '1766820621872'
+      sourceHandle: source
+      target: '1766820634418'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 1766820634418-source-1766820646572-target
+      source: '1766820634418'
+      sourceHandle: source
+      target: '1766820646572'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 1766820646572-source-1766820657056-target
+      source: '1766820646572'
+      sourceHandle: source
+      target: '1766820657056'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 1766820657056-source-1766820668901-target
+      source: '1766820657056'
+      sourceHandle: source
+      target: '1766820668901'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1766820668901-source-1766820680109-target
+      source: '1766820668901'
+      sourceHandle: source
+      target: '1766820680109'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: raw_prompt
+          max_length: 102400
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: raw_prompt
+        - default: ''
+          hint: ''
+          label: vars
+          max_length: 512
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: vars
+        - default: ''
+          hint: ''
+          label: enhance_case
+          max_length: 102400
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: enhance_case
+        - default: ''
+          hint: ''
+          label: compile_strict
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: checkbox
+          variable: compile_strict
+        - default: ''
+          hint: ''
+          label: human_patches_json
+          max_length: 102400
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: human_patches_json
+        - default: ''
+          hint: ''
+          label: origin_provider
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: origin_provider
+        - default: ''
+          hint: ''
+          label: origin_model
+          max_length: 256
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: origin_model
+      height: 265
+      id: '1766820407515'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json, hashlib, unicodedata, uuid, datetime\n\nMAX_VARS_SNAPSHOT_BYTES\
+          \ = 16384\nMAX_ENHANCE_CASE_CHARS = 8000\n\ndef _utc_now_iso():\n    return\
+          \ datetime.datetime.utcnow().replace(microsecond=0).isoformat() + \"Z\"\n\
+          \ndef _sha256_text(s: str) -> str:\n    return \"sha256:\" + hashlib.sha256(s.encode(\"\
+          utf-8\")).hexdigest()\n\ndef _clip_utf8(s: str, max_bytes: int) -> str:\n\
+          \    b = s.encode(\"utf-8\")\n    if len(b) <= max_bytes:\n        return\
+          \ s\n    return b[:max_bytes].decode(\"utf-8\", errors=\"ignore\")\n\ndef\
+          \ _canonicalize(text: str) -> str:\n    text = (text or \"\").replace(\"\
+          \\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")\n    text = \"\\n\".join([ln.rstrip(\"\
+          \ \\t\") for ln in text.split(\"\\n\")])\n    return unicodedata.normalize(\"\
+          NFKC\", text)\n\ndef main(raw_prompt: str, vars: str = \"\", enhance_case:\
+          \ str = \"\"):\n    raw_prompt = raw_prompt or \"\"\n    canonical = _canonicalize(raw_prompt)\n\
+          \n    semir_id = \"semir-\" + str(uuid.uuid4())\n    compile_run_id = \"\
+          run-\" + str(uuid.uuid4())\n    compile_run_started_at = _utc_now_iso()\n\
+          \n    # vars snapshot: try JSON first, fallback to text\n    vars_snapshot\
+          \ = {\"format\": \"text\", \"data\": vars or \"\"}\n    try:\n        if\
+          \ vars and vars.strip():\n            vars_snapshot = {\"format\": \"json\"\
+          , \"data\": json.loads(vars)}\n    except Exception:\n        pass\n\n \
+          \   if vars_snapshot[\"format\"] == \"text\":\n        vars_snapshot[\"\
+          data\"] = _clip_utf8(vars_snapshot[\"data\"], MAX_VARS_SNAPSHOT_BYTES)\n\
+          \n    enhance_case = (enhance_case or \"\")[:MAX_ENHANCE_CASE_CHARS]\n\n\
+          \    source_prompt_obj = {\n        \"raw\": raw_prompt,\n        \"canonical\"\
+          : canonical,\n        \"hashes\": {\n            \"raw_sha256\": _sha256_text(raw_prompt),\n\
+          \            \"canonical_sha256\": _sha256_text(canonical),\n        },\n\
+          \        \"canonicalization\": {\n            \"normalization\": [\"trim_trailing_spaces\"\
+          , \"normalize_newlines_to_lf\", \"unicode_nfkc\"]\n        },\n    }\n\n\
+          \    compilation_context_obj = {\n        \"vars_snapshot\": vars_snapshot,\n\
+          \        \"enhance_case_snapshot\": {\"format\": \"text\", \"data\": enhance_case},\n\
+          \        \"postprocess_applied\": [],\n    }\n\n    return {\n        \"\
+          canonical_prompt\": canonical,\n        \"source_prompt_obj\": source_prompt_obj,\n\
+          \        \"compilation_context_obj\": compilation_context_obj,\n       \
+          \ \"semir_id\": semir_id,\n        \"compile_run_id\": compile_run_id,\n\
+          \        \"compile_run_started_at\": compile_run_started_at,\n    }\n"
+        code_language: python3
+        outputs:
+          canonical_prompt:
+            children: null
+            type: string
+          compilation_context_obj:
+            children: null
+            type: object
+          compile_run_id:
+            children: null
+            type: string
+          compile_run_started_at:
+            children: null
+            type: string
+          semir_id:
+            children: null
+            type: string
+          source_prompt_obj:
+            children: null
+            type: object
+        selected: false
+        title: Canonicalize + Init IDs
+        type: code
+        variables:
+        - value_selector:
+          - '1766820407515'
+          - raw_prompt
+          value_type: string
+          variable: raw_prompt
+        - value_selector:
+          - '1766820407515'
+          - vars
+          value_type: string
+          variable: vars
+        - value_selector:
+          - '1766820407515'
+          - enhance_case
+          value_type: string
+          variable: enhance_case
+      height: 52
+      id: '1766820610973'
+      position:
+        x: 382
+        y: 282
+      positionAbsolute:
+        x: 382
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1766820610973'
+          - canonical_prompt
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-3-pro-preview
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 0380e77e-99fd-4893-9de3-58815fea75f9
+          role: system
+          text: "你是 PromptSem 编译器（Semantic Extractor）。\n\n你的目标：在 PromptSemIR_config\
+            \ 的约束下，把输入的 PROMPT（canonical 文本）抽取成 promptSem（语义草稿）。\n\n【输入】\n- CONFIG：PromptSemIR_config（JSONC\
+            \ 原样字符串）。包含字段白名单、分层规则、证据规则等。\n- PROMPT：canonical prompt 全文（evidence_snippets\
+            \ 必须逐字来自此文本）。你不得改写、重排、规范化 PROMPT。\n- VARS：变量表线索（可能为空）。只能作为提示；除非能在 PROMPT\
+            \ 中找到逐字证据，否则不得进入 core。\n- ENHANCE：增强用例（可能为空）。只能帮助覆盖提醒/表达，不得引入新事实。\n\n\
+            【输出硬规则（必须严格遵守）】\n1) 你只输出一个纯 JSON 对象；不得输出解释、Markdown、代码块、<think> 或任何额外文本。\n\
+            2) 顶层只允许一个 key：promptSem。多一个 key 都算失败。\n3) promptSem 的字段必须严格受 CONFIG.compile.extraction_scope\
+            \ 白名单约束；未在白名单中的字段不得输出。\n4) 任何字段如果在 PROMPT 中找不到可逐字引用的证据：不要输出该字段（不要输出 value:null\
+            \ / evidence_snippets:[] 这种占位）。\n5) 【契约保真优先】当 PROMPT 明确给出输出字段/结构/Schema\
+            \ 时，你的任务是“保留并结构化保存”，不是“总结/改写”。\n\n【promptSem 结构硬约束】\n- promptSem 只允许三个\
+            \ root key：core_semantics / derived_semantics / augmentation_plan\n- 每个“语义字段”必须是一个对象(field\
+            \ object)，并且：\n  - 必须包含：value / origin / evidence_snippets\n  - 仅当 origin=inferred\
+            \ 时，才允许额外包含：rationale / confidence\n  - 除上述键以外，禁止输出任何其他键（例如：needs_human_anchor、anchors、start、end、context_hash、context_window\
+            \ 等一律禁止）\n\n【证据（evidence_snippets）硬约束：必须逐字引用 PROMPT】\n- evidence_snippets\
+            \ 必须是字符串数组，每个 snippet 必须是 PROMPT 中逐字复制的连续片段，不得改动任何标点或空格。\n- 每个字段必须至少 1\
+            \ 条 evidence_snippets，最多 5 条。\n- 每条 snippet 长度必须在 3~160 字符之间（超过 160 必须换更短且更唯一的片段）。\n\
+            - snippet 必须能在 PROMPT 中找到（逐字命中）。\n\n【语义分层规则（硬约束，不要混层）】\n- core_semantics：只允许\
+            \ origin=explicit 或 origin=entailed；不得包含任何猜测/常识推断。\n- derived_semantics：只允许\
+            \ origin=inferred；必须提供 rationale + confidence（0~1），并提供支持推断的 evidence_snippets。\n\
+            - augmentation_plan：只允许 origin=projected（增强建议）；不得冒充原文事实。\n\n【origin 枚举（硬约束）】\n\
+            origin 只能取以下四个值之一：explicit / entailed / inferred / projected。\n禁止输出 implied\
+            \ / deduced / derived / guessed 等任何其他词。\n\n【变量字段结构硬约束】\n1) core_semantics.variables_explicit：\n\
+            - 该字段本身是 field object：{value, origin, evidence_snippets}\n- 其中 value 必须是“对象列表”(List\
+            \ of Objects)，每个变量对象只允许这些键：\n  - name (string，必填)\n  - type (string，可选，能从原文逐字确定才填，否则不填)\n\
+            \  - description (string，必填)\n  - required (boolean，可选，能从原文逐字确定才填，否则不填)\n\
+            - 严禁在“变量对象”内部输出 origin/evidence_snippets/anchors 等任何额外键\n- 示例（正确）：\n \
+            \ \"variables_explicit\": {\n    \"value\": [{\"name\":\"topic\",\"type\"\
+            :\"string\",\"description\":\"主题\"}],\n    \"origin\":\"explicit\",\n\
+            \    \"evidence_snippets\":[\"- {{topic}}：主题\"]\n  }\n\n【输出契约（output_spec）硬约束：必须保真\
+            \ Schema】\n当 PROMPT 中出现 output protocol / 输出协议 / “字段固定如下” / “输出必须是严格 JSON”\
+            \ 等明确契约，并且该段落包含一个 JSON 结构块（以 { 开始，以匹配的 } 结束），你必须按以下规则抽取 output_spec：\n\
+            \n1) core_semantics.output_spec 的 value 必须是对象(dict)，并且必须包含：\n   - format:\
+            \ \"json\"   （统一用小写 json）\n   - schema_raw: string\n     * schema_raw\
+            \ 必须把 PROMPT 中的那段 { ... } 结构块逐字复制进来（反转义后必须与原文完全一致）\n     * 不得改写字段名、层级、顺序、标点、大小写\n\
+            \     * schema_raw 是 JSON 字符串值：需要做标准 JSON 转义（\\n、\\\"），但内容必须保真\n   - fixed_fields:\
+            \ true   （当 PROMPT 出现“字段固定如下/字段固定”）\n   - json_only: true      （当 PROMPT\
+            \ 出现“不要额外文字/仅输出 JSON”）\n   - forbid_code_fence: true （当 PROMPT 出现“不用代码块/不要用代码块/不要\
+            \ ```”）\n   - must_include_phrase_when_insufficient: \"数据不足\" （当 PROMPT\
+            \ 明确要求出现固定短语“数据不足”）\n\n2) output_spec.evidence_snippets：\n   - 只引用短句证据（例如“输出必须是严格\
+            \ JSON…”、“字段固定如下…”、“不用代码块…”），不要把整段 schema 放进 evidence_snippets（会超 160\
+            \ 字）。\n   - schema_raw 的证据通过上述短句 + schema_raw 本身保真即可。\n\n3) 【强制失败条件】\n\
+            \   - 如果你识别到 PROMPT 给出了 { ... } 的输出结构块，但 output_spec.value 没有 schema_raw，则视为编译失败（不要用\
+            \ schema_structure 摘要替代）。\n\n【约束（constraints）补充规则】\n- 如果 PROMPT 明确要求“输出必须严格\
+            \ JSON/不要额外文字/不用代码块”，请把该要求也纳入 core_semantics.constraints.value（因为它属于显式约束）。\n\
+            \n【禁止输出定位信息（硬约束）】\n- 绝对禁止输出 anchors / start / end / start_index / end_index\
+            \ / context_hash / context_window。\n- 这些定位与哈希由工具端在后续步骤基于 canonical PROMPT\
+            \ 计算。\n\n【strict 模式】\n- 若 CONFIG.compile.compile_strict=true：不得输出任何 inferred（derived_semantics\
+            \ 为空或不输出）。\n\n请严格按以上要求输出 JSON。\n"
+        - id: 26c21c2f-b6f6-4f07-b433-1d63e085d99b
+          role: user
+          text: "【CONFIG：PromptSemIR_config（JSONC 原样提供）】\n{{{\n  /* ============================================================\n\
+            PromptSemIR_config (JSONC)  —— V2 修正版\n*\n设计目标（本版关键变化）：\n降低 compile_llm\
+            \ 失败概率：LLM 只做“语义理解 + 结构化抽取 + evidence（可定位线索）”\n将确定性工作下沉到工具端：canonicalize\
+            \ / JSON 清洗校验 / schema 校验 / evidence→anchors 定位 / hash / gates\n避免双版本漂移：final_view\
+            \ = promptSem(base) + human_overrides(patches) 的可重复物化结果\n============================================================\
+            \ */\n  \"meta\": {\n    \"config_name\": \"PromptSemIR_config\",\n  \
+            \  \"config_version\": \"1.1.1\",\n/* 该 config 期望生成的 PromptSemIR 规范版本\
+            \ */\n\"target_semir_spec\": {\n  \"name\": \"PromptSemIR\",\n  \"version\"\
+            : \"1.0.0\"\n},\n​\n/* source_prompt 的存储策略（MVP 建议 raw+canonical 都存） */\n\
+            \"source_prompt_storage\": {\n  \"store_raw\": true,\n  \"store_canonical\"\
+            : true\n},\n​\n/* canonical 文本生成规则：必须与 anchors 的基准一致 */\n\"canonicalization\"\
+            : {\n  \"normalization\": [\n    \"trim_trailing_spaces\",\n    \"normalize_newlines_to_lf\"\
+            ,\n    \"unicode_nfkc\"\n  ]\n},\n​\n/* anchors 的索引口径：用于“工具端”计算 start/end（LLM\
+            \ 不直接输出 start/end） */\n\"anchor_indexing\": {\n  \"basis\": \"canonical\"\
+            ,\n  \"unit\": \"char\",\n  /* 说明：char 按 canonical 文本的 Unicode code point\
+            \ 计数；LF(\\n)=1；start inclusive / end exclusive */\n  \"encoding\": \"\
+            utf-8\"\n},\n​\n/* provenance（溯源）与 anchors 的全局策略 */\n\"provenance\": {\n\
+            \  \"enabled\": true,\n​\n  /* core 字段是否必须具备 anchors（注意：在“中间态”允许 unresolved，但发布门禁会拦）\
+            \ */\n  \"require_anchors_in_core\": true,\n​\n  /* anchors 数量上限：避免过长\
+            \ */\n  \"max_anchors_per_field\": 5,\n​\n  /* 是否在 anchors 中冗余保存 snippet（便于人读）\n\
+            \     口径统一：与 compile.llm_output_contract.evidence_policy.snippet_max_chars\
+            \ 一致 */\n  \"include_text_snippet\": true,\n  \"snippet_max_chars\": 160,\n\
+            ​\n  /* 上下文窗口与哈希：由工具端基于 anchors 回填 */\n  \"include_context_window\": true,\n\
+            \  \"context_window_chars\": 80,\n  \"include_context_hash\": true,\n\
+            \  \"context_hash_algo\": \"sha256\"\n},\n​\n/* ====== 编译上下文快照（审计/复现关键）\
+            \ ======\n   - VARS / ENHANCE 允许参与编译，但必须快照进 PromptSemIR（哪怕为空）\n   - 这是“可复现”的硬要求：否则无法解释某些变量/约束为何被判定为必填\
+            \ */\n\"compilation_context_storage\": {\n  \"enabled\": true,\n  \"store_vars_snapshot\"\
+            : true,\n  \"store_enhance_case_snapshot\": true,\n​\n  /* 防止过大：建议做上限与裁剪；裁剪策略由工具端实现\
+            \ */\n  \"max_vars_snapshot_bytes\": 16384,\n  \"max_enhance_case_chars\"\
+            : 8000\n},\n​\n/* ====== 确定性排序（提升 JSON Patch 稳健性） ======\n   - 对“数组<对象>\
+            \ 且具备 name/id 键”的字段，建议工具端在落盘前做稳定排序\n   - 这样 patch 中的 /0 /1 索引更稳定（仍不完美，但显著降低漂移）\
+            \ */\n\"deterministic_sorting\": {\n  \"enabled\": true,\n  \"rules\"\
+            : [\n    { \"path\": \"/promptSem/core_semantics/variables_explicit/value\"\
+            , \"key\": \"name\", \"order\": \"asc\" },\n    { \"path\": \"/promptSem/derived_semantics/implicit_variables/value\"\
+            , \"key\": \"name\", \"order\": \"asc\" }\n  ]\n},\n​\n/* ====== 关键：evidence\
+            \ → anchors 的“工具端”确定性定位策略 ====== */\n\"anchor_resolution\": {\n  \"producer\"\
+            : \"tool\",\n​\n  /* evidence 的基准：推荐 canonical（因为 compile 输入即 canonical）\
+            \ */\n  \"evidence_basis\": \"canonical\",\n​\n  /* 工具端匹配策略（按顺序尝试） */\n\
+            \  \"matching_strategy_order\": [\n    \"exact\",\n    \"whitespace_normalized\"\
+            ,\n    \"nfkc_normalized\"\n  ],\n​\n  /* 多处命中/无法命中时：统一标记 needs_human_anchor\
+            \ */\n  \"on_multiple_matches\": \"needs_human_anchor\",\n  \"on_no_match\"\
+            : \"needs_human_anchor\",\n​\n  \"max_candidate_matches\": 20,\n​\n  /*\
+            \ unresolved 标记口径：工具端统一写入，供人审与发布门禁使用 */\n  \"unresolved_flag\": {\n  \
+            \  \"field_name\": \"needs_human_anchor\",\n    \"severity\": \"warning\"\
+            \n  }\n}\n  },\n  /* ============================================================\n\
+            Compile 阶段配置：raw/canonical prompt -> PromptSem（语义草稿）\n============================================================\
+            \ */\n  \"compile\": {\n    /* 严格模式：true 时不允许产出 inferred（推断层为空或不生成） */\n\
+            \    \"compile_strict\": false,\n/* 编译 LLM 配置（执行抽取的模型） */\n\"compiler_llm\"\
+            : {\n  \"provider\": \"openai|azure|anthropic|...\",\n  \"model\": \"\
+            gpt-...\",\n  \"model_revision\": \"optional-pin-if-available\",\n  \"\
+            endpoint\": \"optional\",\n  \"params\": {\n    \"temperature\": 0.0,\n\
+            \    \"top_p\": 1\n  }\n},\n​\n/* 合规：在发送给 LLM 前是否脱敏（MVP 可先关；生产建议开） */\n\
+            \"security\": {\n  \"redact_secrets_before_llm\": false,\n  \"redaction_policy_ref\"\
+            : null\n},\n​\n/* 抽取范围（字段白名单）：编译输出必须严格限制在这里 */\n\"extraction_scope\":\
+            \ {\n  \"core_semantics\": [\n    \"intent\",\n    \"role\",\n    \"variables_explicit\"\
+            ,\n    \"constraints\",\n    \"output_spec\"\n  ],\n  \"derived_semantics\"\
+            : [\n    \"assumptions\",\n    \"implicit_variables\",\n    \"inferred_constraints\"\
+            \n  ],\n  \"augmentation_plan\": [\n    \"suggested_examples\",\n    \"\
+            projected_output_schema\",\n    \"stability_improvements\"\n  ]\n},\n\
+            ​\n/* ====== 关键：LLM 输出契约（降低失败率） ======\n   - LLM 必须输出“字段语义 + evidence_snippets”\n\
+            \   - LLM 不输出 anchors 的 start/end（由工具端 anchor_resolution 计算） */\n\"llm_output_contract\"\
+            : {\n  /* field object 的最小键集 */\n  \"field_object_keys\": [\n    \"value\"\
+            ,\n    \"origin\",\n    \"evidence_snippets\"\n  ],\n​\n  /* evidence_snippets\
+            \ 规则：用于工具端定位 anchors */\n  \"evidence_policy\": {\n    \"require_evidence_for_core\"\
+            : true,\n    \"min_snippets_per_field\": 1,\n    \"max_snippets_per_field\"\
+            : 5,\n    \"snippet_min_chars\": 3,\n    \"snippet_max_chars\": 160,\n\
+            ​\n    /* 建议 LLM 直接从输入 canonical prompt 复制片段（禁止改写） */\n    \"snippet_must_be_verbatim\"\
+            : true,\n​\n    /* 修正：LLM 不输出 context_window（由工具端基于 anchors 回填） */\n  \
+            \  \"allow_context_window\": false\n  },\n​\n  /* derived(inferred) 附加要求：必须给\
+            \ rationale/confidence（供人审与治理） */\n  \"inferred_requirements\": {\n  \
+            \  \"require_rationale\": true,\n    \"require_confidence\": true,\n  \
+            \  \"confidence_range\": [0.0, 1.0]\n  },\n​\n  /* 明确禁止：LLM 输出任何定位/上下文字段（工具端负责）\
+            \ */\n  \"forbidden_keys\": [\n    \"anchors\",\n    \"start\",\n    \"\
+            end\",\n    \"context_hash\",\n    \"context_window\"\n  ]\n},\n​\n/*\
+            \ provenance 规则：core 只允许 explicit/entailed；derived 才能 inferred；augmentation\
+            \ 才能 projected */\n\"provenance_policy\": {\n  \"core_allowed_origins\"\
+            : [\"explicit\", \"entailed\"],\n  \"derived_allowed_origins\": [\"inferred\"\
+            ],\n  \"augmentation_allowed_origins\": [\"projected\"]\n}\n  },\n  /*\
+            \ ============================================================\nTest 阶段配置：用例验证（可选）\n\
+            ============================================================ */\n  \"\
+            test\": {\n    /* MVP 建议：先关闭自动测试（仍需保留 validation_report 结构）\n       后续补齐\
+            \ test_suite / harness 即可开启门禁 */\n    \"enabled\": false\n/* 注意：即使 enabled=false\
+            \ 或未配置 test_suite，打包阶段仍必须生成 validation_report，且 status=not_run */\n  },\n\
+            \  /* ============================================================\nPackage\
+            \ 阶段配置：PromptSem + anchors + 人审 + test -> PromptSemIR\n============================================================\
+            \ */\n  \"package\": {\n    \"lifecycle_policy\": {\n      \"on_test_pass_status\"\
+            : \"validated\",\n      \"require_human_review_before_release\": true,\n\
+            \      \"on_release_status\": \"released\"\n    },\n\"release_gates\"\
+            : {\n  \"require_no_unresolved_anchors_in_core\": true,\n  \"require_no_needs_human_flags\"\
+            : true,\n  \"allow_release_when_tests_not_run\": false\n},\n​\n\"review_policy\"\
+            : {\n  \"review_triggers\": [\n    \"has_needs_human_anchor\",\n    \"\
+            has_inferred_fields\",\n    \"core_missing_required_fields\"\n  ],\n \
+            \ \"must_confirm_core_fields\": [\n    \"intent\",\n    \"variables_explicit\"\
+            ,\n    \"constraints\",\n    \"output_spec\"\n  ],\n  \"inferred_resolution_required\"\
+            : true\n},\n​\n/* SEMIR 顶层结构：规定必须包含哪些段\n   - validation_report 必须永远存在；跳过测试时\
+            \ status=not_run\n   - compilation_context 必须存在（可为空），用于复现 */\n\"required_sections\"\
+            : [\n  \"meta\",\n  \"compiler_ref\",\n  \"packager_ref\",\n  \"source_prompt\"\
+            ,\n  \"compilation_context\",\n  \"origin_model_adaptation\",\n  \"runs.compile_run\"\
+            ,\n  \"promptSem\",\n  \"human_overrides\",\n  \"validation_report\"\n\
+            ],\n​\n\"runs_schema\": {\n  \"compile_run_fields\": [\n    \"run_id\"\
+            ,\n    \"started_at\",\n    \"ended_at\",\n    \"llm\",\n    \"params\"\
+            ,\n    \"status\",\n    \"errors\",\n    \"security_applied\"\n  ],\n\
+            \  \"test_run_fields\": [\n    \"run_id\",\n    \"started_at\",\n    \"\
+            ended_at\",\n    \"system_under_test\",\n    \"judge_llm\",\n    \"judge_prompt_ref\"\
+            ,\n    \"evaluation_protocol\",\n    \"status\",\n    \"summary\"\n  ]\n\
+            },\n​\n\"origin_model_adaptation_policy\": {\n  \"required\": true,\n\
+            \  \"resolve_order\": [\n    \"caller_provided_origin_model_adaptation\"\
+            ,\n    \"repo_metadata\",\n    \"default_fallback\"\n  ],\n  \"default_fallback\"\
+            : {\n    \"provider\": null,\n    \"model\": null,\n    \"model_revision\"\
+            : null,\n    \"capability_hints\": {\n      \"supports_tools\": null,\n\
+            \      \"supports_json_mode\": null,\n      \"prefers_system_role\": null,\n\
+            \      \"max_context_tokens_est\": null\n    }\n  }\n},\n​\n\"security\"\
+            : {\n  \"redact_secrets_before_store\": false,\n  \"redaction_policy_ref\"\
+            : null\n}\n  }\n}}}\n\n【PROMPT：canonical prompt 全文（evidence_snippets 必须逐字来自此文本）】\n\
+            {{#1766820610973.canonical_prompt#}}\n\n【VARS：变量表线索（可能为空）】\n{{#1766820407515.vars#}}\n\
+            \n【ENHANCE：增强用例（可能为空）】\n{{#1766820407515.enhance_case#}}\n\n请严格按 system_prompt\
+            \ 要求输出 JSON。\n"
+        selected: false
+        title: Compile PromptSem
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1766820621872'
+      position:
+        x: 684
+        y: 282
+      positionAbsolute:
+        x: 684
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\nimport re\nimport datetime\n\n# ==========================================\n\
+          # CONFIG: V2.1 Extraction Scope (Whitelist)\n#   Align with PromptSemIR_config\
+          \ V2.1\n# ==========================================\nEXTRACTION_SCOPE =\
+          \ {\n    \"core_semantics\": [\n        \"intent\", \"role\", \"variables_explicit\"\
+          , \"constraints\", \"output_spec\"\n    ],\n    \"derived_semantics\": [\n\
+          \        \"assumptions\", \"implicit_variables\", \"inferred_constraints\"\
+          \n    ],\n    \"augmentation_plan\": [\n        \"suggested_examples\",\
+          \ \"projected_output_schema\", \"stability_improvements\"\n    ]\n}\n\n\
+          DEFAULT_ORIGINS = {\n    \"core_semantics\": \"explicit\",\n    \"derived_semantics\"\
+          : \"inferred\",\n    \"augmentation_plan\": \"projected\"\n}\n\nPROVENANCE_POLICY\
+          \ = {\n    \"core_semantics\": [\"explicit\", \"entailed\"],\n    \"derived_semantics\"\
+          : [\"inferred\"],\n    \"augmentation_plan\": [\"projected\"]\n}\n\n# Evidence\
+          \ policy (V2.1)\nEVIDENCE_MIN_ITEMS = 1\nEVIDENCE_MAX_ITEMS = 5\nSNIPPET_MIN_CHARS\
+          \ = 3\nSNIPPET_MAX_CHARS = 160\n\n# Forbidden keys anywhere inside Node2\
+          \ compile output (promptSem tree)\nFORBIDDEN_KEYS_ANYWHERE = {\n    \"compile_run_min\"\
+          ,\n    \"compiler_config_ref\",\n    \"anchors\",\n    \"start\",\n    \"\
+          end\",\n    \"start_index\",\n    \"end_index\",\n    \"context_hash\",\n\
+          \    \"context_window\",\n    \"needs_human_anchor\",\n}\n\n# Allowed keys\
+          \ in a field object (deep reject unknown)\nFIELD_OBJECT_BASE_KEYS = {\"\
+          value\", \"origin\", \"evidence_snippets\"}\nFIELD_OBJECT_INFERRED_EXTRA_KEYS\
+          \ = {\"rationale\", \"confidence\"}\n\n# Allowed keys inside variable item\
+          \ objects\nVARIABLE_ITEM_ALLOWED_KEYS = {\"name\", \"type\", \"description\"\
+          , \"required\"}\n\n\ndef _utc_now_iso():\n    return datetime.datetime.utcnow().replace(microsecond=0).isoformat()\
+          \ + \"Z\"\n\n\ndef _clean_llm_output(text: str) -> str:\n    \"\"\"Extract\
+          \ a JSON object string from arbitrary text.\"\"\"\n    if text is None:\n\
+          \        return \"{}\"\n\n    text = str(text)\n\n    # Remove <think> blocks\n\
+          \    text = re.sub(r\"<think>.*?</think>\", \"\", text, flags=re.DOTALL)\n\
+          \n    # Strip fenced code blocks if present\n    match = re.search(r\"```(?:json)?(.*?)```\"\
+          , text, re.DOTALL)\n    if match:\n        content = match.group(1).strip()\n\
+          \        if content.startswith(\"{\") and content.endswith(\"}\"):\n   \
+          \         return content\n\n    # Best-effort extract the first JSON object\n\
+          \    start = text.find(\"{\")\n    end = text.rfind(\"}\")\n    if start\
+          \ != -1 and end != -1 and end > start:\n        return text[start:end +\
+          \ 1]\n    return text.strip()\n\n\ndef _try_parse_json_object(maybe_json_text:\
+          \ str):\n    \"\"\"Try json.loads, return (obj, success, err_msg).\"\"\"\
+          \n    try:\n        return json.loads(maybe_json_text), True, \"\"\n   \
+          \ except Exception as e:\n        return {}, False, str(e)\n\n\ndef _unwrap_node2_payload(llm_data:\
+          \ dict):\n    \"\"\"\n    Dify/LLM adapters sometimes return:\n      { \"\
+          text\": \"{ ... }\", \"usage\": {...}, ... }\n    We unwrap if promptSem\
+          \ is inside llm_data[\"text\"].\n    \"\"\"\n    if isinstance(llm_data,\
+          \ dict) and \"promptSem\" in llm_data:\n        return llm_data\n\n    if\
+          \ isinstance(llm_data, dict) and isinstance(llm_data.get(\"text\"), str):\n\
+          \        inner = _clean_llm_output(llm_data[\"text\"])\n        inner_obj,\
+          \ ok, _ = _try_parse_json_object(inner)\n        if ok and isinstance(inner_obj,\
+          \ dict):\n            return inner_obj\n\n    return llm_data\n\n\ndef _strip_forbidden_keys(obj):\n\
+          \    \"\"\"Recursively remove forbidden keys anywhere in the structure.\"\
+          \"\"\n    if isinstance(obj, dict):\n        for k in list(obj.keys()):\n\
+          \            if k in FORBIDDEN_KEYS_ANYWHERE:\n                obj.pop(k,\
+          \ None)\n        for k, v in list(obj.items()):\n            obj[k] = _strip_forbidden_keys(v)\n\
+          \        return obj\n    if isinstance(obj, list):\n        return [_strip_forbidden_keys(x)\
+          \ for x in obj]\n    return obj\n\n\ndef _snippet_in_prompt_exact(snippet:\
+          \ str, prompt: str) -> bool:\n    \"\"\"Strict verbatim containment check\
+          \ (no normalization).\"\"\"\n    if not isinstance(snippet, str) or not\
+          \ isinstance(prompt, str):\n        return False\n    return snippet in\
+          \ prompt\n\n\ndef _clean_evidence_list(evidence, canonical_prompt: str,\
+          \ warnings, ctx_name: str):\n    \"\"\"Clean evidence_snippets: list[str],\
+          \ trim, enforce length, must verbatim match canonical prompt.\"\"\"\n  \
+          \  if not isinstance(evidence, list):\n        warnings.append(f\"evidence_snippets\
+          \ is not a list: {ctx_name}\")\n        return []\n\n    cleaned = []\n\
+          \    seen = set()\n    for s in evidence:\n        if not isinstance(s,\
+          \ str):\n            continue\n        s2 = s.strip()\n        if len(s2)\
+          \ < SNIPPET_MIN_CHARS:\n            continue\n        if len(s2) > SNIPPET_MAX_CHARS:\n\
+          \            warnings.append(f\"evidence snippet too long (>160), dropped:\
+          \ {ctx_name}\")\n            continue\n        if s2 in seen:\n        \
+          \    continue\n        if not _snippet_in_prompt_exact(s2, canonical_prompt):\n\
+          \            warnings.append(f\"evidence snippet not found verbatim in canonical\
+          \ prompt, dropped: {ctx_name}\")\n            continue\n        seen.add(s2)\n\
+          \        cleaned.append(s2)\n        if len(cleaned) >= EVIDENCE_MAX_ITEMS:\n\
+          \            break\n\n    return cleaned\n\n\ndef _is_valid_field_object(obj):\n\
+          \    if not isinstance(obj, dict):\n        return False\n    return FIELD_OBJECT_BASE_KEYS.issubset(obj.keys())\n\
+          \n\ndef _sanitize_field_object(field_obj: dict, section: str, field_name:\
+          \ str, canonical_prompt: str, warnings):\n    \"\"\"\n    Enforce deep key\
+          \ whitelist and evidence policy.\n    Return sanitized field_obj or None\
+          \ (drop).\n    \"\"\"\n    # Remove forbidden keys first\n    field_obj\
+          \ = _strip_forbidden_keys(field_obj)\n\n    origin = field_obj.get(\"origin\"\
+          )\n    allowed_origins = PROVENANCE_POLICY.get(section, [])\n    if origin\
+          \ not in allowed_origins:\n        warnings.append(f\"Invalid origin '{origin}'\
+          \ for {section}.{field_name}; coerced to default\")\n        origin = DEFAULT_ORIGINS.get(section,\
+          \ \"explicit\")\n        field_obj[\"origin\"] = origin\n\n    # Enforce\
+          \ allowed keys in field object\n    allowed_keys = set(FIELD_OBJECT_BASE_KEYS)\n\
+          \    if origin == \"inferred\":\n        allowed_keys |= FIELD_OBJECT_INFERRED_EXTRA_KEYS\n\
+          \        if \"rationale\" not in field_obj or \"confidence\" not in field_obj:\n\
+          \            warnings.append(f\"Inferred field missing rationale/confidence:\
+          \ {section}.{field_name}\")\n\n    for k in list(field_obj.keys()):\n  \
+          \      if k not in allowed_keys:\n            field_obj.pop(k, None)\n\n\
+          \    # Evidence clean & enforce\n    ctx_name = f\"{section}.{field_name}\"\
+          \n    cleaned_evidence = _clean_evidence_list(field_obj.get(\"evidence_snippets\"\
+          , []), canonical_prompt, warnings, ctx_name)\n    if len(cleaned_evidence)\
+          \ < EVIDENCE_MIN_ITEMS:\n        warnings.append(f\"Missing usable evidence_snippets;\
+          \ field dropped: {section}.{field_name}\")\n        return None\n    field_obj[\"\
+          evidence_snippets\"] = cleaned_evidence\n\n    # variables_explicit item\
+          \ sanitization\n    if section == \"core_semantics\" and field_name == \"\
+          variables_explicit\":\n        val = field_obj.get(\"value\")\n        if\
+          \ not isinstance(val, list):\n            warnings.append(\"variables_explicit.value\
+          \ is not a list; field dropped\")\n            return None\n\n        new_val\
+          \ = []\n        for item in val:\n            if not isinstance(item, dict):\n\
+          \                continue\n            item = _strip_forbidden_keys(item)\n\
+          \n            clean_item = {k: item.get(k) for k in VARIABLE_ITEM_ALLOWED_KEYS\
+          \ if k in item}\n\n            if not isinstance(clean_item.get(\"name\"\
+          ), str) or not clean_item[\"name\"].strip():\n                continue\n\
+          \            if not isinstance(clean_item.get(\"description\"), str) or\
+          \ not clean_item[\"description\"].strip():\n                continue\n\n\
+          \            clean_item[\"name\"] = clean_item[\"name\"].strip()\n     \
+          \       clean_item[\"description\"] = clean_item[\"description\"].strip()\n\
+          \n            if \"type\" in clean_item and isinstance(clean_item[\"type\"\
+          ], str):\n                t = clean_item[\"type\"].strip()\n           \
+          \     if t:\n                    clean_item[\"type\"] = t\n            \
+          \    else:\n                    clean_item.pop(\"type\", None)\n\n     \
+          \       if \"required\" in clean_item and not isinstance(clean_item[\"required\"\
+          ], bool):\n                clean_item.pop(\"required\", None)\n\n      \
+          \      new_val.append(clean_item)\n\n        field_obj[\"value\"] = new_val\n\
+          \n    return field_obj\n\n\ndef _is_truthy_object(obj):\n    return isinstance(obj,\
+          \ dict) and len(obj.keys()) > 0\n\n\ndef _validate_output_spec_schema_raw(promptSem_inner:\
+          \ dict, errors: list):\n    \"\"\"\n    Rule confirmed by you:\n    - Node3\
+          \ does NOT parse the prompt to infer anything.\n    - ONLY IF Node2 outputs\
+          \ output_spec AND its value.format indicates json,\n      then schema_raw\
+          \ MUST exist and be a non-empty string.\n    \"\"\"\n    core = promptSem_inner.get(\"\
+          core_semantics\", {})\n    out = core.get(\"output_spec\")\n\n    if not\
+          \ isinstance(out, dict):\n        return\n\n    val = out.get(\"value\"\
+          )\n    if not isinstance(val, dict):\n        errors.append(\"core_semantics.output_spec.value\
+          \ must be an object when output_spec is provided\")\n        return\n\n\
+          \    fmt = val.get(\"format\")\n    if isinstance(fmt, str) and fmt.strip().lower()\
+          \ == \"json\":\n        schema_raw = val.get(\"schema_raw\")\n        if\
+          \ not isinstance(schema_raw, str) or not schema_raw.strip():\n         \
+          \   errors.append(\"output_spec.format indicates json, but output_spec.value.schema_raw\
+          \ is missing/empty (must be provided by Node2)\")\n    # If format is absent\
+          \ or not json: no schema_raw requirement (by your rule)\n\n\ndef main(\n\
+          \    llm_text: str,\n    canonical_prompt: str,\n    compile_run_id: str,\n\
+          \    compile_run_started_at: str,\n    compile_strict: str,\n    compilation_context_obj:\
+          \ dict\n):\n    errors = []\n    warnings = []\n\n    # Strict mode check\n\
+          \    is_strict = False\n    try:\n        if isinstance(compile_strict,\
+          \ bool):\n            is_strict = compile_strict\n        elif isinstance(compile_strict,\
+          \ str) and str(compile_strict).lower() == \"true\":\n            is_strict\
+          \ = True\n    except Exception:\n        pass\n\n    # ----------------------------------------\n\
+          \    # Step A: Parse JSON (and unwrap if needed)\n    # ----------------------------------------\n\
+          \    clean_json_text = _clean_llm_output(llm_text)\n    llm_data, ok, err\
+          \ = _try_parse_json_object(clean_json_text)\n    if not ok:\n        errors.append(f\"\
+          JSON parse error: {err}\")\n        llm_data = {}\n\n    llm_data = _unwrap_node2_payload(llm_data)\n\
+          \n    # Enforce: top-level ONLY key \"promptSem\"\n    if isinstance(llm_data,\
+          \ dict):\n        top_keys = set(llm_data.keys())\n        if top_keys and\
+          \ top_keys != {\"promptSem\"}:\n            errors.append(f\"Top-level must\
+          \ contain ONLY 'promptSem'. Found keys: {sorted(list(top_keys))}\")\n\n\
+          \    # Prepare output skeleton (keep 3 root keys stable)\n    promptSem_inner\
+          \ = {\n        \"core_semantics\": {},\n        \"derived_semantics\": {},\n\
+          \        \"augmentation_plan\": {}\n    }\n\n    # ----------------------------------------\n\
+          \    # Step B: Whitelist + Validation (NO backfill / NO prompt parsing)\n\
+          \    # ----------------------------------------\n    if not errors:\n  \
+          \      if not isinstance(llm_data, dict) or \"promptSem\" not in llm_data:\n\
+          \            errors.append(\"Missing top-level key: promptSem\")\n     \
+          \   else:\n            raw_sem = llm_data.get(\"promptSem\", {})\n     \
+          \       if not isinstance(raw_sem, dict):\n                errors.append(\"\
+          promptSem is not an object\")\n                raw_sem = {}\n\n        \
+          \    # Strip forbidden keys from whole promptSem tree\n            raw_sem\
+          \ = _strip_forbidden_keys(raw_sem)\n\n            # Enforce: promptSem root\
+          \ keys only (warn, ignore extras)\n            allowed_root = {\"core_semantics\"\
+          , \"derived_semantics\", \"augmentation_plan\"}\n            for k in list(raw_sem.keys()):\n\
+          \                if k not in allowed_root:\n                    warnings.append(f\"\
+          promptSem contains unexpected root key '{k}', ignored\")\n\n           \
+          \ # Strict: derived_semantics must be empty or absent\n            if is_strict:\n\
+          \                ds = raw_sem.get(\"derived_semantics\", {})\n         \
+          \       if _is_truthy_object(ds):\n                    errors.append(\"\
+          compile_strict=true but derived_semantics is non-empty (Node2 must not output\
+          \ inferred fields)\")\n\n            for section, allowed_fields in EXTRACTION_SCOPE.items():\n\
+          \                if is_strict and section == \"derived_semantics\":\n  \
+          \                  continue\n\n                sec_obj = raw_sem.get(section,\
+          \ {})\n                if not isinstance(sec_obj, dict):\n             \
+          \       sec_obj = {}\n\n                for field_name in allowed_fields:\n\
+          \                    field_obj = sec_obj.get(field_name)\n             \
+          \       if field_obj is None:\n                        continue  # no backfill\n\
+          \n                    if not _is_valid_field_object(field_obj):\n      \
+          \                  warnings.append(f\"Invalid field object structure, dropped:\
+          \ {section}.{field_name}\")\n                        continue\n\n      \
+          \              sanitized = _sanitize_field_object(\n                   \
+          \     field_obj=field_obj,\n                        section=section,\n \
+          \                       field_name=field_name,\n                       \
+          \ canonical_prompt=canonical_prompt or \"\",\n                        warnings=warnings\n\
+          \                    )\n                    if sanitized is None:\n    \
+          \                    continue\n\n                    promptSem_inner[section][field_name]\
+          \ = sanitized\n\n            # Required: intent must exist after sanitization\n\
+          \            if \"intent\" not in promptSem_inner[\"core_semantics\"]:\n\
+          \                errors.append(\"Missing required core field: core_semantics.intent\
+          \ (or no usable evidence)\")\n\n            # Your confirmed rule: validate\
+          \ output_spec only based on Node2 output\n            _validate_output_spec_schema_raw(promptSem_inner,\
+          \ errors)\n\n    # ----------------------------------------\n    # Step\
+          \ C: Construct Artifacts\n    # ----------------------------------------\n\
+          \    status = \"pass\"\n    if errors:\n        status = \"fail\"\n    elif\
+          \ warnings:\n        status = \"warning\"\n\n    has_inferred = False\n\
+          \    for f in promptSem_inner.get(\"derived_semantics\", {}).values():\n\
+          \        if isinstance(f, dict) and f.get(\"origin\") == \"inferred\":\n\
+          \            has_inferred = True\n            break\n\n    validation_compile\
+          \ = {\n        \"status\": status,\n        \"errors\": errors,\n      \
+          \  \"warnings\": warnings,\n        \"has_inferred_fields\": has_inferred\n\
+          \    }\n\n    compile_run_obj = {\n        \"run_id\": compile_run_id,\n\
+          \        \"started_at\": compile_run_started_at,\n        \"ended_at\":\
+          \ _utc_now_iso(),\n        \"status\": \"success\" if not errors else \"\
+          error\",\n        \"errors\": errors,\n        \"llm\": {\"provider\": \"\
+          llm-node\"},\n        \"security_applied\": {\"redact_secrets_before_llm\"\
+          : False}\n    }\n\n    if not isinstance(compilation_context_obj, dict):\n\
+          \        compilation_context_obj = {\"postprocess_applied\": []}\n    compilation_context_obj.setdefault(\"\
+          postprocess_applied\", [])\n    compilation_context_obj[\"postprocess_applied\"\
+          ].append(\"post_validate:v2.1_validate_only_no_backfill\")\n\n    # Serialize\
+          \ to string to avoid depth/type issues\n    try:\n        promptSem_validated_str\
+          \ = json.dumps(promptSem_inner, ensure_ascii=False)\n    except Exception\
+          \ as e:\n        promptSem_validated_str = \"{}\"\n        errors.append(f\"\
+          promptSem serialization failed: {str(e)}\")\n\n    try:\n        compilation_context_str\
+          \ = json.dumps(compilation_context_obj, ensure_ascii=False)\n    except\
+          \ Exception as e:\n        compilation_context_str = \"{}\"\n        errors.append(f\"\
+          context serialization failed: {str(e)}\")\n\n    return {\n        \"promptSem_validated\"\
+          : promptSem_validated_str,     # String\n        \"validation_compile\"\
+          : validation_compile,           # Object\n        \"compile_run_obj\": compile_run_obj,\
+          \                 # Object\n        \"compilation_context_obj\": compilation_context_str\
+          \  # String\n    }\n"
+        code_language: python3
+        outputs:
+          compilation_context_obj:
+            children: null
+            type: string
+          compile_run_obj:
+            children: null
+            type: object
+          promptSem_validated:
+            children: null
+            type: string
+          validation_compile:
+            children: null
+            type: object
+        selected: false
+        title: Post-Validate
+        type: code
+        variables:
+        - value_selector:
+          - '1766820621872'
+          - text
+          value_type: string
+          variable: llm_text
+        - value_selector:
+          - '1766820610973'
+          - canonical_prompt
+          value_type: string
+          variable: canonical_prompt
+        - value_selector:
+          - '1766820610973'
+          - compilation_context_obj
+          value_type: string
+          variable: compilation_context_obj
+        - value_selector:
+          - '1766820610973'
+          - compile_run_id
+          value_type: string
+          variable: compile_run_id
+        - value_selector:
+          - '1766820610973'
+          - compile_run_started_at
+          value_type: string
+          variable: compile_run_started_at
+        - value_selector:
+          - '1766820407515'
+          - compile_strict
+          value_type: boolean
+          variable: compile_strict
+      height: 52
+      id: '1766820634418'
+      position:
+        x: 981.9889477548234
+        y: 282
+      positionAbsolute:
+        x: 981.9889477548234
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import hashlib, unicodedata, copy, json\n\n# ==========================================\n\
+          # Constants & Config\n# ==========================================\nMATCHING_STRATEGY_ORDER\
+          \ = [\"exact\", \"whitespace_normalized\", \"nfkc_normalized\"]\nMAX_CANDIDATE_MATCHES\
+          \ = 20\nUNRESOLVED_FLAG_NAME = \"needs_human_anchor\"\nREQUIRE_ANCHORS_IN_CORE\
+          \ = True\nMAX_ANCHORS_PER_FIELD = 5\nINCLUDE_TEXT_SNIPPET = True\nSNIPPET_MAX_CHARS\
+          \ = 160\nINCLUDE_CONTEXT_WINDOW = True\nCONTEXT_WINDOW_CHARS = 80\nINCLUDE_CONTEXT_HASH\
+          \ = True\nCONTEXT_HASH_ALGO = \"sha256\"\nANCHOR_BASIS = \"canonical\"\n\
+          \n# ... (保留原有的 Helper Functions: _sha256_text, _find_all, _ws_normalize_with_map,\
+          \ _ws_normalize, _nfkc_normalize_with_map, _nfkc_normalize, _locate_snippet,\
+          \ _is_field_object) ...\n# 为了节省篇幅，这里假设 Helper Functions 保持不变，请确保代码框里包含它们。\n\
+          # 如果需要我完整贴出 Helper Functions 请告诉我。\n\n# 重新贴一下 Helper 避免出错\ndef _sha256_text(s:\
+          \ str) -> str:\n    return \"sha256:\" + hashlib.sha256(s.encode(\"utf-8\"\
+          )).hexdigest()\n\ndef _find_all(haystack: str, needle: str, max_matches:\
+          \ int):\n    if not needle: return []\n    out = []\n    start = 0\n   \
+          \ while len(out) < max_matches:\n        idx = haystack.find(needle, start)\n\
+          \        if idx == -1: break\n        out.append(idx)\n        start = idx\
+          \ + 1\n    return out\n\ndef _ws_normalize_with_map(s: str):\n    norm =\
+          \ []; mp = []; i = 0\n    while i < len(s):\n        if s[i].isspace():\n\
+          \            j = i\n            while j < len(s) and s[j].isspace(): j +=\
+          \ 1\n            norm.append(\" \"); mp.append(i); i = j\n        else:\n\
+          \            norm.append(s[i]); mp.append(i); i += 1\n    return \"\".join(norm),\
+          \ mp\n\ndef _ws_normalize(s: str):\n    norm = []; i = 0\n    while i <\
+          \ len(s):\n        if s[i].isspace():\n            j = i\n            while\
+          \ j < len(s) and s[j].isspace(): j += 1\n            norm.append(\" \");\
+          \ i = j\n        else:\n            norm.append(s[i]); i += 1\n    return\
+          \ \"\".join(norm)\n\ndef _nfkc_normalize_with_map(s: str):\n    norm = [];\
+          \ mp = []\n    for i, ch in enumerate(s):\n        n = unicodedata.normalize(\"\
+          NFKC\", ch)\n        for out_ch in n:\n            norm.append(out_ch);\
+          \ mp.append(i)\n    return \"\".join(norm), mp\n\ndef _nfkc_normalize(s:\
+          \ str):\n    return unicodedata.normalize(\"NFKC\", s)\n\ndef _locate_snippet(snippet:\
+          \ str, prompt: str):\n    for strat in MATCHING_STRATEGY_ORDER:\n      \
+          \  if strat == \"exact\":\n            idxs = _find_all(prompt, snippet,\
+          \ MAX_CANDIDATE_MATCHES)\n            if idxs: return [(i, i + len(snippet))\
+          \ for i in idxs]\n        elif strat == \"whitespace_normalized\":\n   \
+          \         norm_prompt, mp = _ws_normalize_with_map(prompt)\n           \
+          \ norm_snip = _ws_normalize(snippet)\n            idxs = _find_all(norm_prompt,\
+          \ norm_snip, MAX_CANDIDATE_MATCHES)\n            if idxs:\n            \
+          \    res = []\n                for i in idxs:\n                    j = i\
+          \ + len(norm_snip)\n                    start_orig = mp[i]\n           \
+          \         end_orig = mp[j - 1] + 1 if (j - 1) < len(mp) else len(prompt)\n\
+          \                    res.append((start_orig, end_orig))\n              \
+          \  return res\n        elif strat == \"nfkc_normalized\":\n            norm_prompt,\
+          \ mp = _nfkc_normalize_with_map(prompt)\n            norm_snip = _nfkc_normalize(snippet)\n\
+          \            idxs = _find_all(norm_prompt, norm_snip, MAX_CANDIDATE_MATCHES)\n\
+          \            if idxs:\n                res = []\n                for i in\
+          \ idxs:\n                    j = i + len(norm_snip)\n                  \
+          \  start_orig = mp[i]\n                    end_orig = mp[j - 1] + 1 if (j\
+          \ - 1) < len(mp) else len(prompt)\n                    res.append((start_orig,\
+          \ end_orig))\n                return res\n    return []\n\ndef _is_field_object(obj)\
+          \ -> bool:\n    return isinstance(obj, dict) and all(k in obj for k in (\"\
+          value\", \"origin\", \"evidence_snippets\"))\n\n# ==========================================\n\
+          # Main Execution (Updated for String Input)\n# ==========================================\n\
+          def main(promptSem_validated, canonical_prompt: str, compilation_context_obj):\n\
+          \    canonical_prompt = canonical_prompt or \"\"\n    \n    # 1. Parse Input\
+          \ Strings (Robustness for Dify Depth Limit Fix)\n    ps_obj = {}\n    if\
+          \ isinstance(promptSem_validated, str):\n        try: ps_obj = json.loads(promptSem_validated)\n\
+          \        except: ps_obj = {}\n    elif isinstance(promptSem_validated, dict):\n\
+          \        ps_obj = promptSem_validated\n        \n    context_obj = {}\n\
+          \    if isinstance(compilation_context_obj, str):\n        try: context_obj\
+          \ = json.loads(compilation_context_obj)\n        except: context_obj = {}\n\
+          \    elif isinstance(compilation_context_obj, dict):\n        context_obj\
+          \ = compilation_context_obj\n\n    # 2. Logic\n    ps = copy.deepcopy(ps_obj)\n\
+          \    warnings = []\n    unresolved_core_fields = []\n    any_needs_human_anchor\
+          \ = False\n\n    for sec in (\"core_semantics\", \"derived_semantics\",\
+          \ \"augmentation_plan\"):\n        sec_obj = ps.get(sec)\n        if not\
+          \ isinstance(sec_obj, dict): continue\n\n        for field, fo in sec_obj.items():\n\
+          \            if not isinstance(fo, dict) or not _is_field_object(fo): continue\n\
+          \            \n            path = f\"/promptSem/{sec}/{field}\"\n      \
+          \      evidence_snips = fo.get(\"evidence_snippets\", [])\n            if\
+          \ not isinstance(evidence_snips, list): evidence_snips = []\n\n        \
+          \    anchors = []\n            field_needs_human = False\n\n           \
+          \ for sn in evidence_snips:\n                if not isinstance(sn, str)\
+          \ or not sn: continue\n                sn_use = sn[:SNIPPET_MAX_CHARS]\n\
+          \                candidates = _locate_snippet(sn_use, canonical_prompt)\n\
+          \n                if len(candidates) == 1:\n                    start, end\
+          \ = candidates[0]\n                    start = max(0, min(int(start), len(canonical_prompt)))\n\
+          \                    end = max(start, min(int(end), len(canonical_prompt)))\n\
+          \                    snippet_real = canonical_prompt[start:end]\n      \
+          \              \n                    before = canonical_prompt[max(0, start\
+          \ - CONTEXT_WINDOW_CHARS) : start] if INCLUDE_CONTEXT_WINDOW else None\n\
+          \                    after = canonical_prompt[end : end + CONTEXT_WINDOW_CHARS]\
+          \ if INCLUDE_CONTEXT_WINDOW else None\n                    ctx_concat =\
+          \ (before or \"\") + snippet_real + (after or \"\")\n                  \
+          \  ctx_hash = _sha256_text(ctx_concat) if (INCLUDE_CONTEXT_HASH and CONTEXT_HASH_ALGO\
+          \ == \"sha256\") else None\n                    \n                    anchor\
+          \ = {\"basis\": ANCHOR_BASIS, \"start\": start, \"end\": end}\n        \
+          \            if INCLUDE_TEXT_SNIPPET: anchor[\"snippet\"] = snippet_real[:SNIPPET_MAX_CHARS]\n\
+          \                    if INCLUDE_CONTEXT_HASH: anchor[\"context_hash\"] =\
+          \ ctx_hash\n                    if INCLUDE_CONTEXT_WINDOW: anchor[\"context_window\"\
+          ] = {\"before\": before, \"after\": after}\n                    anchors.append(anchor)\n\
+          \                elif len(candidates) == 0:\n                    field_needs_human\
+          \ = True\n                    warnings.append({\"path\": path, \"message\"\
+          : \"evidence_snippet not found in canonical prompt\"})\n               \
+          \ else:\n                    field_needs_human = True\n                \
+          \    warnings.append({\"path\": path, \"message\": f\"evidence_snippet matched\
+          \ multiple locations ({len(candidates)})\"})\n                \n       \
+          \         if len(anchors) >= MAX_ANCHORS_PER_FIELD: break\n\n          \
+          \  if sec == \"core_semantics\" and REQUIRE_ANCHORS_IN_CORE and len(anchors)\
+          \ == 0:\n                field_needs_human = True\n\n            fo[\"anchors\"\
+          ] = anchors\n            if field_needs_human:\n                any_needs_human_anchor\
+          \ = True\n                fo[UNRESOLVED_FLAG_NAME] = True\n            \
+          \    if sec == \"core_semantics\": unresolved_core_fields.append(path)\n\
+          \            else:\n                fo[UNRESOLVED_FLAG_NAME] = False\n\n\
+          \    # 3. Update Context\n    if not isinstance(context_obj, dict): context_obj\
+          \ = {\"postprocess_applied\": []}\n    context_obj.setdefault(\"postprocess_applied\"\
+          , [])\n    context_obj[\"postprocess_applied\"].append(\"anchor_resolve:evidence_to_anchors\"\
+          )\n\n    validation_anchors = {\n        \"status\": \"pass\" if not unresolved_core_fields\
+          \ else \"warning\",\n        \"unresolved_core_fields\": unresolved_core_fields,\n\
+          \        \"warnings\": warnings,\n        \"any_needs_human_anchor\": any_needs_human_anchor,\n\
+          \    }\n\n    # 4. Return as Strings (Maintain Chain Consistency)\n    return\
+          \ {\n        \"promptSem_anchored\": json.dumps(ps, ensure_ascii=False),\n\
+          \        \"validation_anchors\": validation_anchors,\n        \"compilation_context_obj\"\
+          : json.dumps(context_obj, ensure_ascii=False)\n    }"
+        code_language: python3
+        outputs:
+          compilation_context_obj:
+            children: null
+            type: string
+          promptSem_anchored:
+            children: null
+            type: string
+          validation_anchors:
+            children: null
+            type: object
+        selected: false
+        title: Anchor Resolve
+        type: code
+        variables:
+        - value_selector:
+          - '1766820634418'
+          - promptSem_validated
+          value_type: string
+          variable: promptSem_validated
+        - value_selector:
+          - '1766820610973'
+          - canonical_prompt
+          value_type: string
+          variable: canonical_prompt
+        - value_selector:
+          - '1766820634418'
+          - compilation_context_obj
+          value_type: string
+          variable: compilation_context_obj
+      height: 52
+      id: '1766820646572'
+      position:
+        x: 1288
+        y: 282
+      positionAbsolute:
+        x: 1288
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import copy, json\n\n# ==========================================\n\
+          # Config & Rules\n# ==========================================\nSORT_RULES\
+          \ = [\n    (\"core_semantics\", \"variables_explicit\", \"value\", \"name\"\
+          ),\n    (\"derived_semantics\", \"implicit_variables\", \"value\", \"name\"\
+          ),\n]\n\n# ==========================================\n# Helpers\n# ==========================================\n\
+          def _is_field_object(obj) -> bool:\n    return isinstance(obj, dict) and\
+          \ all(k in obj for k in (\"value\", \"origin\", \"evidence_snippets\"))\n\
+          \ndef _sort_list_of_dicts(lst, key):\n    try:\n        return sorted(lst,\
+          \ key=lambda x: (\"\" if x.get(key) is None else str(x.get(key))))\n   \
+          \ except Exception:\n        return lst\n\n# ==========================================\n\
+          # Main\n# ==========================================\ndef main(promptSem_anchored:\
+          \ str, compilation_context_obj: dict):\n    # 1. 解析输入：兼容 String 或 Dict\n\
+          \    ps_in = {}\n    if isinstance(promptSem_anchored, str):\n        try:\n\
+          \            ps_in = json.loads(promptSem_anchored)\n        except Exception:\n\
+          \            ps_in = {}\n    elif isinstance(promptSem_anchored, dict):\n\
+          \        ps_in = promptSem_anchored\n    \n    ps = copy.deepcopy(ps_in)\n\
+          \n    # 2. 执行排序逻辑\n    for sec_name, field_name, value_key, sort_key in\
+          \ SORT_RULES:\n        sec_obj = ps.get(sec_name)\n        if not isinstance(sec_obj,\
+          \ dict):\n            continue\n\n        fo = sec_obj.get(field_name)\n\
+          \        if not _is_field_object(fo):\n            continue\n\n        val\
+          \ = fo.get(value_key)\n        # 仅对 对象列表 进行排序\n        if isinstance(val,\
+          \ list) and all(isinstance(x, dict) for x in val):\n            fo[value_key]\
+          \ = _sort_list_of_dicts(val, sort_key)\n\n    # 3. 更新 Context\n    if not\
+          \ isinstance(compilation_context_obj, dict):\n        compilation_context_obj\
+          \ = {\"postprocess_applied\": []}\n    compilation_context_obj.setdefault(\"\
+          postprocess_applied\", [])\n    compilation_context_obj[\"postprocess_applied\"\
+          ].append(\"deterministic_sort:variables_by_name\")\n\n    # 4. 输出序列化：再次转为\
+          \ JSON String，防止传递给 Node 7 时报 Depth Limit\n    try:\n        promptSem_sorted_str\
+          \ = json.dumps(ps, ensure_ascii=False)\n    except Exception:\n        promptSem_sorted_str\
+          \ = \"{}\"\n\n    return {\n        \"promptSem_sorted\": promptSem_sorted_str,\
+          \ # 输出为 String\n        \"compilation_context_obj\": compilation_context_obj\n\
+          \    }"
+        code_language: python3
+        outputs:
+          compilation_context_obj:
+            children: null
+            type: object
+          promptSem_sorted:
+            children: null
+            type: string
+        selected: false
+        title: Deterministic Sort
+        type: code
+        variables:
+        - value_selector:
+          - '1766820646572'
+          - promptSem_anchored
+          value_type: string
+          variable: promptSem_anchored
+        - value_selector:
+          - '1766820646572'
+          - compilation_context_obj
+          value_type: string
+          variable: compilation_context_obj
+      height: 52
+      id: '1766820657056'
+      position:
+        x: 1590
+        y: 282
+      positionAbsolute:
+        x: 1590
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json, hashlib, datetime, uuid, copy\n\n# ==========================================\n\
+          # 1. Config & Constants\n# ==========================================\n\
+          PACKAGER_NAME = \"PromptSemIR_packager\"\nPACKAGER_VERSION = \"1.0.2\"\n\
+          PROMPTSEMIR_CONFIG_NAME = \"PromptSemIR_config\"\nPROMPTSEMIR_CONFIG_VERSION\
+          \ = \"1.1.1\"\nCOMPILE_CONFIG_MODEL_NAME = \"compile_config_model\"\nCOMPILE_CONFIG_MODEL_VERSION\
+          \ = \"2.1.0\"\n\n# ==========================================\n# 2. Helper\
+          \ Functions\n# ==========================================\ndef _utc_now_iso():\n\
+          \    return datetime.datetime.utcnow().replace(microsecond=0).isoformat()\
+          \ + \"Z\"\n\ndef _sha256_text(s: str) -> str:\n    if not s: return None\n\
+          \    return \"sha256:\" + hashlib.sha256(s.encode(\"utf-8\")).hexdigest()\n\
+          \ndef _is_field_object(obj) -> bool:\n    return isinstance(obj, dict) and\
+          \ all(k in obj for k in (\"value\", \"origin\", \"evidence_snippets\"))\n\
+          \ndef _final_view_from_promptSem(promptSem: dict):\n    def rec(x):\n  \
+          \      if _is_field_object(x):\n            return x.get(\"value\")\n  \
+          \      if isinstance(x, dict):\n            return {k: rec(v) for k, v in\
+          \ x.items()}\n        if isinstance(x, list):\n            return [rec(v)\
+          \ for v in x]\n        return x\n    return rec(promptSem)\n\ndef _json_pointer_get(doc,\
+          \ pointer, create_missing=False):\n    if pointer == \"\" or pointer ==\
+          \ \"/\":\n        return None, None\n    if not pointer.startswith(\"/\"\
+          ):\n        raise ValueError(\"Invalid JSON pointer\")\n    tokens = pointer.split(\"\
+          /\")[1:]\n    cur = doc\n    for tok in tokens[:-1]:\n        tok = tok.replace(\"\
+          ~1\", \"/\").replace(\"~0\", \"~\")\n        if isinstance(cur, list):\n\
+          \            if tok == \"-\":\n                if create_missing:\n    \
+          \                cur.append({})\n                    cur = cur[-1]\n   \
+          \             else:\n                    raise ValueError(\"'-' not allowed\
+          \ in middle of pointer\")\n            idx = int(tok)\n            if idx\
+          \ < 0 or idx >= len(cur):\n                if create_missing:\n        \
+          \            while len(cur) <= idx:\n                        cur.append({})\n\
+          \                else:\n                    raise IndexError(\"index out\
+          \ of range\")\n            cur = cur[idx]\n        else:\n            if\
+          \ tok not in cur:\n                if create_missing:\n                \
+          \    cur[tok] = {}\n                else:\n                    raise KeyError(tok)\n\
+          \            cur = cur[tok]\n    last = tokens[-1].replace(\"~1\", \"/\"\
+          ).replace(\"~0\", \"~\")\n    return cur, last\n\ndef _json_patch_apply(doc,\
+          \ patch_ops):\n    d = copy.deepcopy(doc)\n    for op in patch_ops:\n  \
+          \      if not isinstance(op, dict) or \"op\" not in op or \"path\" not in\
+          \ op:\n            raise ValueError(\"Invalid patch op\")\n        op_type\
+          \ = op[\"op\"]\n        path = op[\"path\"]\n        \n        # 1. ADD\
+          \ / REPLACE\n        if op_type in (\"add\", \"replace\"):\n           \
+          \ parent, last = _json_pointer_get(d, path, create_missing=(op_type == \"\
+          add\"))\n            val = op.get(\"value\")\n            if parent is None:\
+          \ \n                d = val\n            elif isinstance(parent, list):\n\
+          \                if last == \"-\":\n                    parent.append(val)\n\
+          \                else:\n                    idx = int(last)\n          \
+          \          if op_type == \"add\":\n                        parent.insert(idx,\
+          \ val)\n                    else:\n                        parent[idx] =\
+          \ val\n            else:\n                parent[last] = val\n\n       \
+          \ # 2. REMOVE\n        elif op_type == \"remove\":\n            parent,\
+          \ last = _json_pointer_get(d, path, create_missing=False)\n            if\
+          \ isinstance(parent, list):\n                parent.pop(int(last))\n   \
+          \         else:\n                parent.pop(last, None)\n\n        # 3.\
+          \ TEST\n        elif op_type == \"test\":\n            parent, last = _json_pointer_get(d,\
+          \ path, create_missing=False)\n            cur = parent[int(last)] if isinstance(parent,\
+          \ list) else parent.get(last)\n            if cur != op.get(\"value\"):\n\
+          \                raise ValueError(f\"test failed at {path}\")\n\n      \
+          \  # 4. MOVE / COPY\n        elif op_type in (\"move\", \"copy\"):\n   \
+          \         from_path = op.get(\"from\")\n            if not from_path:\n\
+          \                raise ValueError(f\"{op_type} missing 'from'\")\n     \
+          \       \n            # Retrieve source\n            parent_from, last_from\
+          \ = _json_pointer_get(d, from_path, create_missing=False)\n            val\
+          \ = parent_from[int(last_from)] if isinstance(parent_from, list) else parent_from.get(last_from)\n\
+          \            \n            # If move, delete source first\n            if\
+          \ op_type == \"move\":\n                if isinstance(parent_from, list):\n\
+          \                    parent_from.pop(int(last_from))\n                else:\n\
+          \                    parent_from.pop(last_from, None)\n            \n  \
+          \          # Insert into destination\n            parent_to, last_to = _json_pointer_get(d,\
+          \ path, create_missing=True)\n            if isinstance(parent_to, list):\n\
+          \                if last_to == \"-\":\n                    parent_to.append(val)\n\
+          \                else:\n                    parent_to.insert(int(last_to),\
+          \ val)\n            else:\n                parent_to[last_to] = val\n\n\
+          \    return d\n\n# ==========================================\n# 3. Main\
+          \ Entry Point\n# ==========================================\ndef main(\n\
+          \    semir_id: str,\n    source_prompt_obj: dict,\n    compilation_context_obj:\
+          \ dict,\n    promptSem_sorted: str,\n    compile_run_obj: dict,\n    validation_compile:\
+          \ dict,\n    validation_anchors: dict,\n    human_patches_json: str = \"\
+          \",\n    reviewed_by: str = None,\n    review_notes: str = None,\n    origin_provider:\
+          \ str = \"google\",\n    origin_model: str = \"gemini-3-flash-preview\"\
+          ,\n    origin_model_revision: str = None,\n    promptsemir_config_jsonc:\
+          \ str = \"\",\n    compile_config_model_jsonc: str = \"\",\n):\n    now\
+          \ = _utc_now_iso()\n    # 确保 ID 存在\n    semir_id = semir_id or (\"semir-\"\
+          \ + str(uuid.uuid4()))\n    internal_warnings = []\n\n    # --- 1. Parse\
+          \ patches ---\n    patches = []\n    if human_patches_json and str(human_patches_json).strip():\n\
+          \        try:\n            patches = json.loads(human_patches_json)\n  \
+          \          if not isinstance(patches, list):\n                internal_warnings.append(f\"\
+          human_patches_json not list: {type(patches)}\")\n                patches\
+          \ = []\n        except Exception as e:\n            internal_warnings.append(f\"\
+          human_patches_json error: {str(e)}\")\n            patches = []\n\n    #\
+          \ --- 2. Parse promptSem_sorted ---\n    promptSem_obj = {}\n    if promptSem_sorted\
+          \ is None:\n        internal_warnings.append(\"promptSem_sorted is None\"\
+          )\n    elif isinstance(promptSem_sorted, str):\n        if not promptSem_sorted.strip():\n\
+          \             internal_warnings.append(\"promptSem_sorted is empty string\"\
+          )\n        else:\n            try:\n                promptSem_obj = json.loads(promptSem_sorted)\n\
+          \            except Exception as e:\n                # Double-serialized\
+          \ fallback\n                try:\n                    loaded_once = json.loads(promptSem_sorted)\n\
+          \                    if isinstance(loaded_once, str):\n                \
+          \        promptSem_obj = json.loads(loaded_once)\n                     \
+          \   internal_warnings.append(\"fixed double-serialized promptSem_sorted\"\
+          )\n                    else:\n                        internal_warnings.append(f\"\
+          parse error: {str(e)}\")\n                except:\n                    \
+          \ internal_warnings.append(f\"fatal parse error: {str(e)}\")\n    elif isinstance(promptSem_sorted,\
+          \ dict):\n        promptSem_obj = promptSem_sorted\n    else:\n        internal_warnings.append(f\"\
+          unexpected type: {type(promptSem_sorted)}\")\n\n    # --- 3. Patching ---\n\
+          \    base_doc = {\"promptSem\": promptSem_obj}\n    patched_doc = base_doc\n\
+          \    if patches:\n        try:\n            patched_doc = _json_patch_apply(base_doc,\
+          \ patches)\n        except Exception as e:\n            internal_warnings.append(f\"\
+          patch failed: {str(e)}\")\n            patched_doc = base_doc\n\n    promptSem_final\
+          \ = patched_doc.get(\"promptSem\", {})\n    final_view = _final_view_from_promptSem(promptSem_final)\n\
+          \n    # --- 4. Hashes ---\n    promptsemir_config_hash = _sha256_text(promptsemir_config_jsonc)\
+          \ if promptsemir_config_jsonc else None\n    compile_config_hash = _sha256_text(compile_config_model_jsonc)\
+          \ if compile_config_model_jsonc else None\n    packager_hash = _sha256_text(f\"\
+          {PACKAGER_NAME}@{PACKAGER_VERSION}\")\n\n    # --- 5. Status Logic ---\n\
+          \    compile_status = (validation_compile or {}).get(\"status\", \"fail\"\
+          )\n    anchors_status = (validation_anchors or {}).get(\"status\", \"warning\"\
+          )\n    test_block = {\"status\": \"not_run\", \"summary\": \"MVP\"}\n  \
+          \  \n    # 综合判定 Status\n    if not promptSem_final and compile_status ==\
+          \ \"pass\":\n        internal_warnings.append(\"CRITICAL: promptSem empty\
+          \ after package\")\n        overall_status = \"fail\"\n    elif compile_status\
+          \ != \"pass\":\n        overall_status = \"fail\"\n    else:\n        #\
+          \ anchors 有 warning 或者 test 没跑，都算 warning，不算 fail\n        overall_status\
+          \ = \"warning\" if (anchors_status != \"pass\" or test_block[\"status\"\
+          ] == \"not_run\") else \"pass\"\n    \n    # Lifecycle: fail -> draft, 否则\
+          \ validated (因为 MVP 测试未跑，暂不 released)\n    lifecycle_status = \"draft\"\
+          \ if overall_status == \"fail\" else \"validated\"\n\n    anchors_block\
+          \ = {\n        \"status\": anchors_status,\n        \"unresolved_core_fields\"\
+          : (validation_anchors or {}).get(\"unresolved_core_fields\", []),\n    \
+          \    \"warnings\": (validation_anchors or {}).get(\"warnings\", []) + [{\"\
+          path\":\"packager\", \"message\":w} for w in internal_warnings]\n    }\n\
+          \n    validation_report = {\n        \"status\": overall_status, \n    \
+          \    \"compile\": {\n            \"status\": compile_status,\n         \
+          \   \"errors\": (validation_compile or {}).get(\"errors\", []),\n      \
+          \      \"warnings\": (validation_compile or {}).get(\"warnings\", []),\n\
+          \        }, \n        \"anchors\": anchors_block, \n        \"test\": test_block\n\
+          \    }\n\n    # --- 6. Context & Assemble ---\n    if not isinstance(compilation_context_obj,\
+          \ dict):\n        compilation_context_obj = {\"postprocess_applied\": []}\n\
+          \    compilation_context_obj.setdefault(\"postprocess_applied\", [])\n \
+          \   compilation_context_obj[\"postprocess_applied\"].append(\"packager:assemble_semir\"\
+          )\n\n    semir = {\n        \"meta\": {\n            \"spec_name\": \"PromptSemIR\"\
+          ,\n            \"spec_version\": \"1.0.0\",\n            \"semir_id\": semir_id,\n\
+          \            \"created_at\": now,\n            \"lifecycle_status\": lifecycle_status,\n\
+          \            \"anchor_indexing\": {\"basis\": \"canonical\", \"unit\": \"\
+          char\"},\n            \"tags\": [\"mvp\", \"prompt-asset\"],\n        },\n\
+          \        \"compiler_ref\": {\n            \"promptsemir_config_ref\": {\"\
+          name\": PROMPTSEMIR_CONFIG_NAME, \"version\": PROMPTSEMIR_CONFIG_VERSION,\
+          \ \"config_hash\": promptsemir_config_hash},\n            \"compile_config_model_ref\"\
+          : {\"name\": COMPILE_CONFIG_MODEL_NAME, \"version\": COMPILE_CONFIG_MODEL_VERSION,\
+          \ \"config_hash\": compile_config_hash},\n        },\n        \"packager_ref\"\
+          : {\"name\": PACKAGER_NAME, \"version\": PACKAGER_VERSION, \"config_hash\"\
+          : packager_hash},\n        \"source_prompt\": source_prompt_obj if isinstance(source_prompt_obj,\
+          \ dict) else {},\n        \"compilation_context\": compilation_context_obj,\n\
+          \        \"origin_model_adaptation\": {\"provider\": origin_provider, \"\
+          model\": origin_model},\n        \"runs\": {\"compile_run\": compile_run_obj\
+          \ if isinstance(compile_run_obj, dict) else {}},\n        \"promptSem\"\
+          : promptSem_final,\n        \"human_overrides\": {\"patches\": patches,\
+          \ \"audit\": {\"reviewed_by\": reviewed_by, \"reviewed_at\": now} if reviewed_by\
+          \ else None},\n        \"final_view\": final_view,\n        \"validation_report\"\
+          : validation_report,\n    }\n\n    # --- 7. Output: Formatted & Raw ---\n\
+          \    \n    # 【关键修改】使用 indent=2 确保生成的 JSON 字符串是带缩进和换行的\n    semir_json_pretty\
+          \ = json.dumps(semir, ensure_ascii=False, indent=2)\n    \n    # 【关键修改】生成一个\
+          \ Markdown 代码块包裹的版本，方便直接复制到 Typora\n    semir_markdown = f\"```json\\n{semir_json_pretty}\\\
+          n```\"\n    \n    return {\n        # 输出纯 JSON（带缩进），可供后续节点使用（JSON parser\
+          \ 兼容带空格的 JSON）\n        \"promptsemir_json\": semir_json_pretty, \n    \
+          \    \n        # 输出为 Markdown 格式，专门用于复制给人类阅读/Typora\n        \"promptsemir_markdown\"\
+          : semir_markdown,\n        \n        # 保留对象输出以防万一\n        \"promptsemir_obj\"\
+          : semir_json_pretty \n    }"
+        code_language: python3
+        outputs:
+          promptsemir_json:
+            children: null
+            type: string
+          promptsemir_markdown:
+            children: null
+            type: string
+          promptsemir_obj:
+            children: null
+            type: string
+        selected: false
+        title: Package PromptSemIR
+        type: code
+        variables:
+        - value_selector:
+          - '1766820610973'
+          - semir_id
+          value_type: string
+          variable: semir_id
+        - value_selector:
+          - '1766820610973'
+          - source_prompt_obj
+          value_type: string
+          variable: source_prompt_obj
+        - value_selector:
+          - '1766820657056'
+          - compilation_context_obj
+          value_type: string
+          variable: compilation_context_obj
+        - value_selector:
+          - '1766820657056'
+          - promptSem_sorted
+          value_type: string
+          variable: promptSem_sorted
+        - value_selector:
+          - '1766820634418'
+          - compile_run_obj
+          value_type: string
+          variable: compile_run_obj
+        - value_selector:
+          - '1766820634418'
+          - validation_compile
+          value_type: string
+          variable: validation_compile
+        - value_selector:
+          - '1766820646572'
+          - validation_anchors
+          value_type: string
+          variable: validation_anchors
+        - value_selector:
+          - '1766820407515'
+          - human_patches_json
+          value_type: string
+          variable: human_patches_json
+      height: 52
+      id: '1766820668901'
+      position:
+        x: 1892
+        y: 282
+      positionAbsolute:
+        x: 1892
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1766820668901'
+          - promptsemir_json
+          value_type: string
+          variable: promptsemir_json
+        selected: true
+        title: 输出
+        type: end
+      height: 88
+      id: '1766820680109'
+      position:
+        x: 2234.326163631064
+        y: 282
+      positionAbsolute:
+        x: 2234.326163631064
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -299.5017214377465
+      y: 195.96909982940247
+      zoom: 0.37892914162759966
+  rag_pipeline_variables: []

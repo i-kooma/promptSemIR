@@ -1,0 +1,287 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: PromptSemIR 解读
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1766973434726-source-1766973467441-target
+      source: '1766973434726'
+      sourceHandle: source
+      target: '1766973467441'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1766973467441-source-1766973497585-target
+      source: '1766973467441'
+      sourceHandle: source
+      target: '1766973497585'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: promptsemir_json
+          max_length: 1024000
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: promptsemir_json
+      height: 109
+      id: '1766973434726'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(promptsemir_json: str) -> dict:\n    \"\"\"\
+          \n    将 PromptSemIR JSON 转换为严格结构化的中英对照 Markdown 报告。\n    更新点：\n    1. 术语映射更新：显式确信/隐式确信/推断/规划建议。\n\
+          \    2. 增加完整的可信度图例说明。\n    \"\"\"\n    \n    # 1. 解析 JSON\n    data = {}\n\
+          \    if isinstance(promptsemir_json, dict):\n        data = promptsemir_json\n\
+          \    else:\n        try:\n            data = json.loads(promptsemir_json)\n\
+          \        except:\n            return {\"report_markdown\": \"Error: 输入不是有效的\
+          \ JSON 格式。\"}\n\n    lines = []\n\n    # ================= 辅助函数 =================\n\
+          \n    def safe_get(obj, path_str, default=None):\n        \"\"\"安全获取嵌套字典值\"\
+          \"\"\n        keys = path_str.split('.')\n        current = obj\n      \
+          \  for k in keys:\n            if isinstance(current, dict):\n         \
+          \       current = current.get(k)\n            else:\n                return\
+          \ default\n        return current if current is not None else default\n\n\
+          \    def trans_origin(origin):\n        \"\"\"来源术语翻译 (根据用户定义更新)\"\"\"\n\
+          \        mapping = {\n            \"explicit\": \"显式确信 (explicit)\",\n \
+          \           \"entailed\": \"隐式确信 (entailed)\",\n            \"inferred\"\
+          : \"LLM的推断 (inferred)\",\n            \"projected\": \"规划建议 (projected)\"\
+          \n        }\n        return mapping.get(origin, origin)\n\n    def render_value(val):\n\
+          \        \"\"\"渲染值：处理字符串、列表、对象列表(清单格式)\"\"\"\n        if val is None or\
+          \ val == \"\" or val == [] or val == {}:\n            return \"无\"\n   \
+          \     \n        # 1. 对象列表（如变量表）：转为 1. **name** (type): desc 格式\n       \
+          \ if isinstance(val, list) and len(val) > 0 and isinstance(val[0], dict):\n\
+          \            list_lines = []\n            for idx, item in enumerate(val,\
+          \ 1):\n                name = item.get('name', 'N/A')\n                typ\
+          \ = item.get('type')\n                desc = item.get('description')\n \
+          \               \n                if 'name' in item:\n                 \
+          \   type_str = f\" ({typ})\" if typ else \"\"\n                    desc_str\
+          \ = f\"：{desc}\" if desc else \"\"\n                    \n             \
+          \       extras = []\n                    for k, v in item.items():\n   \
+          \                     if k not in ['name', 'type', 'description']:\n   \
+          \                         extras.append(f\"{k}={v}\")\n                \
+          \    extras_str = f\" [{', '.join(extras)}]\" if extras else \"\"\n    \
+          \                \n                    line = f\"{idx}. **{name}**{type_str}{desc_str}{extras_str}\"\
+          \n                    list_lines.append(line)\n                else:\n \
+          \                   clean_json = json.dumps(item, ensure_ascii=False)\n\
+          \                    list_lines.append(f\"{idx}. {clean_json}\")\n     \
+          \       \n            return \"\\n\" + \"\\n\".join(list_lines)\n\n    \
+          \    # 2. 普通列表\n        if isinstance(val, list):\n            return \"\
+          \\n\" + \"\\n\".join([f\"- {str(v)}\" for v in val])\n        \n       \
+          \ # 3. 字符串/数字\n        return f\"{val}\"\n\n    def render_field(title_cn,\
+          \ title_en, field_obj, is_derived=False):\n        \"\"\"渲染单个语义字段块\"\"\"\
+          \n        header = f\"#### {title_cn} ({title_en})\"\n        \n       \
+          \ if not field_obj:\n            return f\"{header}\\n> **内容**：无\\n\"\n\
+          \        \n        value = field_obj.get(\"value\")\n        origin = field_obj.get(\"\
+          origin\", \"未知\")\n        evidence = field_obj.get(\"evidence_snippets\"\
+          , [])\n        \n        # 核心内容\n        content_block = f\"> **来源**：{trans_origin(origin)}\\\
+          n> **内容**：{render_value(value)}\"\n        \n        # 推断层特有字段\n       \
+          \ if is_derived:\n            rationale = field_obj.get(\"rationale\", \"\
+          无\")\n            confidence = field_obj.get(\"confidence\", \"N/A\")\n\
+          \            content_block += f\"\\n> **推断理由**：{rationale}\\n> **置信度**：{confidence}\"\
+          \n\n        # 证据展示\n        ev_block = \"\"\n        if evidence:\n    \
+          \        snippets = [f\"“{s}”\" for s in evidence]\n            ev_str =\
+          \ \"; \".join(snippets)\n            if len(ev_str) > 100: ev_str = ev_str[:100]\
+          \ + \"...\"\n            ev_block = f\"\\n> **证据**：{ev_str}\"\n        else:\n\
+          \            # 只有 projected 允许无证据，其他显示无\n            if origin == \"projected\"\
+          :\n                ev_block = \"\" # 建议类信息可以不显示“证据：无”以保持整洁，或者显示“基于专家知识”\n\
+          \            else:\n                ev_block = \"\\n> **证据**：无\"\n     \
+          \       \n        return f\"{header}\\n{content_block}{ev_block}\\n\"\n\n\
+          \    # ================= 报告生成逻辑 =================\n\n    # 1. 标题与元数据\n \
+          \   meta = data.get(\"meta\", {})\n    semir_id = meta.get(\"semir_id\"\
+          , \"N/A\")\n    status = meta.get(\"lifecycle_status\", \"N/A\").upper()\n\
+          \    \n    lines.append(f\"# PromptSemIR 资产解读报告\")\n    lines.append(f\"\
+          **资产ID**: `{semir_id}`\")\n    lines.append(f\"**生命周期状态**: **{status}**\"\
+          )\n    lines.append(f\"**创建时间**: {meta.get('created_at', 'N/A')}\")\n  \
+          \  lines.append(\"---\")\n\n    # 2. 原始提示词\n    lines.append(\"## 1. 原始提示词\
+          \ (Source Prompt)\")\n    source = data.get(\"source_prompt\", {})\n   \
+          \ raw = source.get(\"raw\", \"\")\n    \n    if raw:\n        lines.append(f\"\
+          > **原始文本全量展示**：\\n```text\\n{raw}\\n```\")\n    else:\n        lines.append(f\"\
+          > **原始文本**：无\")\n        \n    lines.append(f\"> **Canonical Hash**: `{safe_get(source,\
+          \ 'hashes.canonical_sha256', 'N/A')}`\")\n    lines.append(\"---\")\n\n\
+          \    # 3. 编译上下文\n    lines.append(\"## 2. 编译上下文 (Compilation Context)\"\
+          )\n    ctx = data.get(\"compilation_context\", {})\n    vars_snap = safe_get(ctx,\
+          \ \"vars_snapshot.data\")\n    enhance_snap = safe_get(ctx, \"enhance_case_snapshot.data\"\
+          )\n    \n    lines.append(f\"- **变量快照 (Vars Snapshot)**: {render_value(vars_snap)}\"\
+          )\n    lines.append(f\"- **增强用例快照 (Enhance Case)**: {render_value(enhance_snap)}\"\
+          )\n    lines.append(\"---\")\n\n    # 4. 核心语义层\n    lines.append(\"## 3.\
+          \ 核心语义层 (Core Semantics)\")\n    \n    # 插入图例说明\n    lines.append(\"> **\U0001F4A1\
+          \ 数据可信度图例**：\")\n    lines.append(\"> * **显式确信 (explicit)**：原文直接写明的文字。\"\
+          )\n    lines.append(\"> * **隐式确信 (entailed)**：原文未直接写明，但逻辑上必然包含的事实。\")\n\
+          \    lines.append(\"> * **推断 (inferred)**：LLM基于概率挖掘的信息（附置信度）。\")\n    lines.append(\"\
+          > * **规划建议 (projected)**：LLM基于专家知识对未来的优化建议（非原文内容）。\")\n    lines.append(\"\
+          \")\n\n    sem = data.get(\"promptSem\", {})\n    core = sem.get(\"core_semantics\"\
+          , {})\n    \n    core_map = [\n        (\"角色\", \"role\"),\n        (\"\
+          意图\", \"intent\"),\n        (\"显式变量\", \"variables_explicit\"),\n      \
+          \  (\"约束条件\", \"constraints\"),\n        (\"输出规范\", \"output_spec\")\n \
+          \   ]\n    for cn, en in core_map:\n        lines.append(render_field(cn,\
+          \ en, core.get(en)))\n    \n    lines.append(\"---\")\n\n    # 5. 推断语义层\n\
+          \    lines.append(\"## 4. 推断语义层 (Derived Semantics)\")\n    derived = sem.get(\"\
+          derived_semantics\", {})\n    \n    derived_map = [\n        (\"隐式变量\",\
+          \ \"implicit_variables\"),\n        (\"假设\", \"assumptions\"),\n       \
+          \ (\"推断约束\", \"inferred_constraints\")\n    ]\n    for cn, en in derived_map:\n\
+          \        lines.append(render_field(cn, en, derived.get(en), is_derived=True))\n\
+          \n    lines.append(\"---\")\n\n    # 6. 增强计划层\n    lines.append(\"## 5.\
+          \ 增强计划层 (Augmentation Plan)\")\n    aug = sem.get(\"augmentation_plan\"\
+          , {})\n    \n    aug_map = [\n        (\"建议示例\", \"suggested_examples\"\
+          ),\n        (\"项目性建议\", \"projected_output_schema\"),\n        (\"稳定性改进\"\
+          , \"stability_improvements\")\n    ]\n    for cn, en in aug_map:\n     \
+          \   lines.append(render_field(cn, en, aug.get(en)))\n\n    lines.append(\"\
+          ---\")\n\n    # 7. 运行与验证\n    lines.append(\"## 6. 运行与验证 (Runs & Validation)\"\
+          )\n    \n    val_rep = data.get(\"validation_report\", {})\n    test_info\
+          \ = val_rep.get(\"test\", {})\n    \n    lines.append(f\"- **编译状态 (Compile\
+          \ Status)**: `{val_rep.get('compile', {}).get('status', 'N/A')}`\")\n  \
+          \  lines.append(f\"- **锚点状态 (Anchor Status)**: `{val_rep.get('anchors',\
+          \ {}).get('status', 'N/A')}`\")\n    lines.append(f\"- **测试状态 (Test Status)**:\
+          \ `{test_info.get('status', 'N/A')}`\")\n    if test_info.get('status')\
+          \ == 'not_run':\n        lines.append(f\"  > *说明：MVP阶段测试未执行 ({test_info.get('summary',\
+          \ '')})*\")\n\n    warnings = val_rep.get(\"compile\", {}).get(\"warnings\"\
+          , []) + val_rep.get(\"anchors\", {}).get(\"warnings\", [])\n    if warnings:\n\
+          \        lines.append(f\"\\n**警告列表 ({len(warnings)})**：\")\n        for\
+          \ w in warnings:\n            lines.append(f\"- {w}\")\n    else:\n    \
+          \    lines.append(f\"\\n**警告列表**：无\")\n\n    lines.append(\"---\")\n\n \
+          \   # 8. 人工修订\n    lines.append(\"## 7. 人工修订 (Human Overrides)\")\n    human\
+          \ = data.get(\"human_overrides\", {})\n    patches = human.get(\"patches\"\
+          , [])\n    audit = human.get(\"audit\")\n\n    if not patches:\n       \
+          \ lines.append(\"**修订补丁 (Patches)**：无\")\n    else:\n        lines.append(f\"\
+          **修订补丁 (Patches)**：共 {len(patches)} 条\")\n        for p in patches:\n  \
+          \          lines.append(f\"- `{p.get('op')}` path: `{p.get('path')}`\")\n\
+          \    \n    if audit:\n        lines.append(f\"\\n**审核信息 (Audit)**：\\n- 审核人：{audit.get('reviewed_by')}\\\
+          n- 时间：{audit.get('reviewed_at')}\\n- 备注：{audit.get('notes')}\")\n\n    return\
+          \ {\n        \"report_markdown\": \"\\n\".join(lines)\n    }"
+        code_language: python3
+        outputs:
+          report_markdown:
+            children: null
+            type: string
+        selected: true
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1766973434726'
+          - promptsemir_json
+          value_type: string
+          variable: promptsemir_json
+      height: 52
+      id: '1766973467441'
+      position:
+        x: 382
+        y: 282
+      positionAbsolute:
+        x: 382
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1766973467441'
+          - report_markdown
+          value_type: string
+          variable: human_report_md
+        selected: false
+        title: 输出
+        type: end
+      height: 88
+      id: '1766973497585'
+      position:
+        x: 684
+        y: 282
+      positionAbsolute:
+        x: 684
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 139.64891211369348
+      y: 106.26216813548331
+      zoom: 0.5743491774985174
+  rag_pipeline_variables: []
